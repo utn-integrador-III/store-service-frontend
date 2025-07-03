@@ -1,12 +1,20 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import "../../styles/navbar.css";
 
 const Navbar: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const navigate = useNavigate();
+  const location = useLocation();
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
+  };
+
+  const handleNavigation = (path: string) => {
+    navigate(path);
+    setIsMenuOpen(false);
   };
 
   useEffect(() => {
@@ -22,55 +30,60 @@ const Navbar: React.FC = () => {
     <nav className={`navbar ${isScrolled ? "scrolled" : ""}`}>
       <div className="navbar-container">
         <div className="navbar-brand">
-          <h2>BookingStore</h2>
+          <button
+            onClick={() => handleNavigation("/")}
+            style={{ background: "none", border: "none", cursor: "pointer" }}
+          >
+            <h2 style={{ color: "var(--white)", margin: 0 }}>BookingStore</h2>
+          </button>
         </div>
 
         <div className={`navbar-menu ${isMenuOpen ? "active" : ""}`}>
           <ul className="navbar-nav">
             <li className="nav-item">
-              <a
-                href="#home"
+              <button
                 className="nav-link"
-                onClick={() => setIsMenuOpen(false)}
+                onClick={() => handleNavigation("/")}
+                style={{ background: "none", border: "none" }}
               >
                 Home
-              </a>
+              </button>
             </li>
             <li className="nav-item">
-              <a
-                href="#services"
+              <button
                 className="nav-link"
-                onClick={() => setIsMenuOpen(false)}
+                onClick={() => handleNavigation("/negocio/1")}
+                style={{ background: "none", border: "none" }}
               >
-                Services
-              </a>
+                Business #1
+              </button>
             </li>
             <li className="nav-item">
-              <a
-                href="#businesses"
+              <button
                 className="nav-link"
-                onClick={() => setIsMenuOpen(false)}
+                onClick={() => handleNavigation("/negocio/2")}
+                style={{ background: "none", border: "none" }}
               >
-                Businesses
-              </a>
+                Business #2
+              </button>
             </li>
             <li className="nav-item">
-              <a
-                href="#about"
+              <button
                 className="nav-link"
                 onClick={() => setIsMenuOpen(false)}
+                style={{ background: "none", border: "none" }}
               >
                 About
-              </a>
+              </button>
             </li>
             <li className="nav-item">
-              <a
-                href="#contact"
+              <button
                 className="nav-link"
                 onClick={() => setIsMenuOpen(false)}
+                style={{ background: "none", border: "none" }}
               >
                 Contact
-              </a>
+              </button>
             </li>
           </ul>
 
