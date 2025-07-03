@@ -88,8 +88,18 @@ const Navbar: React.FC = () => {
           </ul>
 
           <div className="navbar-actions">
-            <button className="btn-login">Login</button>
-            <button className="btn-signup">Sign Up</button>
+            <button
+              className="btn-login"
+              onClick={() => handleNavigation("/forms/login")}
+            >
+              Login
+            </button>
+            <button
+              className="btn-signup"
+              onClick={() => handleNavigation("/forms/register")}
+            >
+              Sign Up
+            </button>
           </div>
         </div>
 
