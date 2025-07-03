@@ -9,6 +9,7 @@ import "./App.css";
 import Navbar from "./components/layout/Navbar";
 import Footer from "./components/layout/Footer";
 import NegociosEspecificos from "./components/pages/company/Negocios_Especificos";
+import Login from "./components/pages/forms/login/Login";
 
 function HomePage() {
   const navigate = useNavigate();
@@ -97,6 +98,7 @@ function App() {
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/negocio/:id" element={<NegociosEspecificos />} />
+          <Route path="/forms/login" element={<Login />} />
         </Routes>
         <Footer />
       </div>
