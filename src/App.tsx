@@ -13,6 +13,7 @@ import NegociosEspecificosPorCategoria from "./components/pages/company/Negocios
 import NegocioEspecifico from "./components/pages/company/Negocio_Especifico";
 import Login from "./components/pages/forms/login/Login";
 import Register from "./components/pages/forms/registers/registerenterprise";
+import RegisterUser from "./components/pages/forms/registers/registeruser";
 
 import ClinicImg from "./assets/images/Clinics.png";
 import RestaurantImg from "./assets/images/Restaurant.png";
@@ -100,38 +101,12 @@ function App() {
           />
           <Route path="/forms/login" element={<Login />} />
           <Route path="/forms/registers" element={<Register />} />
+          <Route path="/forms/registersusers" element={<RegisterUser />} 
         </Routes>
         <Footer />
       </div>
     </Router>
   );
 }
-
-
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
-
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
-}
-
 
 export default App;
