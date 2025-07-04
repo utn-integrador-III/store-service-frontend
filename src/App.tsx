@@ -1,4 +1,3 @@
-
 import React from "react";
 import {
   BrowserRouter as Router,
@@ -9,7 +8,8 @@ import {
 import "./App.css";
 import Navbar from "./components/layout/Navbar";
 import Footer from "./components/layout/Footer";
-import NegociosEspecificos from "./components/pages/company/Negocios_Especificos";
+import NegociosEspecificosPorCategoria from "./components/pages/company/Negocios_Especificos_por_categoria";
+import NegocioEspecifico from "./components/pages/company/Negocio_Especifico";
 import Login from "./components/pages/forms/login/Login";
 import Register from "./components/pages/forms/registers/registerenterprise";
 
@@ -58,7 +58,6 @@ function HomePage() {
   );
 }
 
-
 // Para llevar a las distintas pantallas, se agregan en "route"
 function App() {
   return (
@@ -67,17 +66,21 @@ function App() {
         <Navbar />
         <Routes>
           <Route path="/" element={<HomePage />} />
-          <Route path="/negocio/:id" element={<NegociosEspecificos />} />
+          <Route
+            path="/categoria/:id"
+            element={<NegociosEspecificosPorCategoria />}
+          />
+          <Route
+            path="/negocio-especifico/:id"
+            element={<NegocioEspecifico />}
+          />
           <Route path="/forms/login" element={<Login />} />
           <Route path="/forms/registers" element={<Register />} />
-          
         </Routes>
         <Footer />
       </div>
     </Router>
-  )
-  }
-
-
+  );
+}
 
 export default App;
