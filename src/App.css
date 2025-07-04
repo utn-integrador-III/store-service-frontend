@@ -1,3 +1,469 @@
+
+@import "./styles/paleta_colores.css";
+
+.App {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(135deg, var(--beige) 0%, var(--sky-blue) 100%);
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden;
+}
+
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
+  min-height: calc(100vh - 200px);
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden;
+}
+
+.hero-section {
+  text-align: center;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 4rem 2rem;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 20px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  animation: fadeInUp 0.8s ease-out;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.hero-section h1 {
+  font-size: 3.5rem;
+  margin-bottom: 1rem;
+  background: linear-gradient(135deg, var(--navy) 0%, var(--teal) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.hero-section p {
+  font-size: 1.3rem;
+  color: #666;
+  margin-bottom: 2rem;
+  line-height: 1.6;
+}
+
+.cta-button {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  padding: 1rem 2.5rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.cta-button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 25px rgba(102, 126, 234, 0.6);
+}
+
+.cta-button:active {
+  transform: translateY(-1px);
+}
+
+.empresa-banner {
+  position: relative;
+  width: 100%;
+  max-width: 1200px;
+  border-radius: 25px;
+  overflow: hidden;
+  margin-bottom: 4rem;
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.15);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.empresa-banner:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 40px 80px rgba(0, 0, 0, 0.2);
+}
+
+.empresa-imagen {
+  width: 100%;
+  height: auto;
+  min-height: 500px; 
+  display: block;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.empresa-banner:hover .empresa-imagen {
+  transform: scale(1.05);
+}
+
+.empresa-descripcion {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(15px);
+  padding: 3rem;
+  border-radius: 20px;
+  max-width: 90%;
+  text-align: center;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+  animation: slideInUp 0.8s ease-out;
+}
+
+.empresa-descripcion h1 {
+  font-size: 2.8rem;
+  margin-bottom: 1.5rem;
+  background: linear-gradient(135deg, var(--navy) 0%, var(--teal) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.empresa-descripcion p {
+  font-size: 1.2rem;
+  color: #555;
+  line-height: 1.6;
+  margin: 0;
+  font-weight: 400;
+}
+
+.categorias-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 3rem;
+  padding: 2rem;
+  justify-items: center;
+  width: 100%;
+  max-width: 1200px; 
+}
+
+.categoria-card {
+  width: 100%;
+  max-width: 450px; 
+  background: linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%);
+  border-radius: 20px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+  text-align: center;
+  padding: 2.5rem; 
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+}
+
+.categoria-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.6), transparent);
+  transition: left 0.5s ease;
+}
+
+.categoria-card:hover::before {
+  left: 100%;
+}
+
+.categoria-card:hover {
+  transform: translateY(-10px) scale(1.02);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(102, 126, 234, 0.3);
+}
+
+.categoria-imagen {
+  width: 100%;
+  max-width: 300px; 
+  height: 240px; 
+  object-fit: cover;
+  margin-bottom: 1.5rem;
+  border-radius: 15px;
+  transition: transform 0.3s ease, filter 0.3s ease;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+}
+
+.categoria-card:hover .categoria-imagen {
+  transform: scale(1.05);
+  filter: brightness(1.1);
+}
+
+.categoria-card h4 {
+  font-size: 1.6rem; 
+  font-weight: 700;
+  color: #333;
+  margin: 0;
+  padding: 0.5rem 0;
+  position: relative;
+  z-index: 2;
+  transition: color 0.3s ease;
+}
+
+.categoria-card:hover h4 {
+  color: var(--navy);
+}
+
+.categoria-card::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(102, 126, 234, 0.1) 0%, transparent 70%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.categoria-card:hover::after {
+  opacity: 1;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -40%);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%);
+  }
+}
+
+@media (max-width: 1024px) {
+  .hero-section {
+    padding: 3rem 1.5rem;
+    margin: 1.5rem;
+  }
+
+  .hero-section h1 {
+    font-size: 3rem;
+  }
+
+  .hero-section p {
+    font-size: 1.2rem;
+  }
+
+  .empresa-imagen {
+    min-height: 450px; 
+  }
+
+  .empresa-descripcion {
+    padding: 2.5rem;
+  }
+
+  .empresa-descripcion h1 {
+    font-size: 2.4rem;
+  }
+
+  .categorias-grid {
+    gap: 2.5rem;
+  }
+
+  .categoria-card {
+    max-width: 400px; 
+    padding: 2rem; 
+  }
+
+  .categoria-imagen {
+    max-width: 280px; 
+    height: 220px; 
+  }
+}
+
+@media (max-width: 960px) {
+  .hero-section {
+    padding: 2.5rem 1.5rem;
+    margin: 1rem;
+  }
+
+  .hero-section h1 {
+    font-size: 2.8rem;
+  }
+
+  .hero-section p {
+    font-size: 1.15rem;
+  }
+
+  .cta-button {
+    padding: 0.9rem 2.2rem;
+    font-size: 1.05rem;
+  }
+
+  .empresa-imagen {
+    min-height: 400px; 
+  }
+
+  .empresa-descripcion {
+    padding: 2rem;
+  }
+
+  .empresa-descripcion h1 {
+    font-size: 2.2rem;
+  }
+
+  .empresa-descripcion p {
+    font-size: 1.1rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .hero-section {
+    padding: 2rem 1rem;
+    margin: 1rem;
+    max-width: calc(100vw - 2rem);
+    width: calc(100% - 2rem);
+  }
+
+  .hero-section h1 {
+    font-size: 2.5rem;
+  }
+
+  .hero-section p {
+    font-size: 1.1rem;
+  }
+
+  .cta-button {
+    padding: 0.8rem 2rem;
+    font-size: 1rem;
+  }
+
+  .main-content {
+    padding: 1rem;
+  }
+
+  .empresa-imagen {
+    min-height: 350px; 
+  }
+
+  .categorias-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+    padding: 1.5rem;
+  }
+
+  .categoria-card {
+    max-width: 100%;
+  }
+
+  .empresa-descripcion {
+    padding: 1.5rem;
+  }
+
+  .empresa-descripcion h1 {
+    font-size: 2rem;
+  }
+
+  .empresa-descripcion p {
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-section {
+    max-width: calc(100vw - 1rem);
+    width: calc(100% - 1rem);
+    margin: 0.5rem;
+    padding: 1.5rem 0.5rem;
+  }
+
+  .hero-section h1 {
+    font-size: 2rem;
+  }
+
+  .hero-section p {
+    font-size: 1rem;
+  }
+
+  .main-content {
+    padding: 0.5rem;
+  }
+
+  .empresa-imagen {
+    min-height: 300px; 
+  }
+
+  .categorias-grid {
+    gap: 1rem;
+    padding: 1rem;
+  }
+
+  .categoria-card {
+    padding: 1rem;
+  }
+
+  .categoria-imagen {
+    max-width: 220px; 
+    height: 170px; 
+  }
+
+  .empresa-descripcion {
+    padding: 1rem;
+  }
+
+  .empresa-descripcion h1 {
+    font-size: 1.8rem;
+  }
+
+  .empresa-descripcion p {
+    font-size: 0.9rem;
+  }
+}
+
+/* Global improvements */
+* {
+  box-sizing: border-box;
+  max-width: 100%;
+}
+
+*:before,
+*:after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
+    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden;
+}
 .App {
   text-align: center;
 }
@@ -99,5 +565,6 @@
   margin: 0;
   color: var(--navy);
 }
+
 
 
