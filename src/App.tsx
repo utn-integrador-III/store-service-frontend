@@ -12,6 +12,7 @@ import Footer from "./components/layout/Footer";
 import NegociosEspecificos from "./components/pages/company/Negocios_Especificos";
 import Login from "./components/pages/forms/login/Login";
 import Register from "./components/pages/forms/registers/registerenterprise";
+import RegisterUser from "./components/pages/forms/registers/registeruser";
 
 function HomePage() {
   const navigate = useNavigate();
@@ -102,6 +103,8 @@ function App() {
           <Route path="/negocio/:id" element={<NegociosEspecificos />} />
           <Route path="/forms/login" element={<Login />} />
           <Route path="/forms/registers" element={<Register />} />
+          <Route path="/forms/registersusers" element={<RegisterUser />} />
+
           
         </Routes>
         <Footer />
