@@ -9,84 +9,75 @@ import {
 import "./App.css";
 import Navbar from "./components/layout/Navbar";
 import Footer from "./components/layout/Footer";
-import NegociosEspecificos from "./components/pages/company/Negocios_Especificos";
+import NegociosEspecificosPorCategoria from "./components/pages/company/Negocios_Especificos_por_categoria";
+import NegocioEspecifico from "./components/pages/company/Negocio_Especifico";
 import Login from "./components/pages/forms/login/Login";
 import Register from "./components/pages/forms/registers/registerenterprise";
 import RegisterUser from "./components/pages/forms/registers/registeruser";
 
+import ClinicImg from "./assets/images/Clinics.png";
+import RestaurantImg from "./assets/images/Restaurant.png";
+import HotelImg from "./assets/images/Hotels.png";
+import BarbershopImg from "./assets/images/Barbershop.png";
+import EmpresaBanner from "./assets/images/empresa.jpg"; 
+
 function HomePage() {
   const navigate = useNavigate();
 
-  const handleNavigateToNegocio = (businessId: number) => {
-    navigate(`/negocio/${businessId}`);
+  const categorias = [
+    {
+      id: 1,
+      imagen: ClinicImg,
+    },
+    {
+      id: 2,
+      imagen: RestaurantImg,
+    },
+    {
+      id: 3,
+      imagen: HotelImg,
+    },
+    {
+      id: 4,
+      imagen: BarbershopImg,
+    },
+  ];
+
+  const handleNavigateToCategoria = (categoryId: number) => {
+    navigate(`/categoria/${categoryId}`);
   };
 
   return (
     <main className="main-content">
-      <div className="hero-section">
-        <h1>Welcome to BookingStore</h1>
-        <h1>Ejemplo de funcionamiento xd</h1>
-        <p>
-          Your premier destination for booking services and managing business
-          operations.
-        </p>
-
-        <div
-          style={{
-            display: "flex",
-            gap: "2rem",
-            justifyContent: "center",
-            marginTop: "2rem",
-          }}
-        >
-          <div
-            style={{
-              textAlign: "center",
-              padding: "2rem",
-              background: "rgba(255, 255, 255, 0.8)",
-              borderRadius: "15px",
-              minWidth: "250px",
-            }}
-          >
-            <h3 style={{ color: "var(--navy)", marginBottom: "1rem" }}>
-              Tech Solutions Co.
-            </h3>
-            <p style={{ color: "#666", marginBottom: "1.5rem" }}>
-              Professional IT services and software development
-            </p>
-            <button
-              className="cta-button"
-              onClick={() => handleNavigateToNegocio(1)} // Aqui se le manda UNO a la funcion para que le pase el parametro
-              style={{ fontSize: "0.9rem", padding: "0.8rem 1.5rem" }}
-            >
-              View Business #1
-            </button>
-          </div>
-
-          <div
-            style={{
-              textAlign: "center",
-              padding: "2rem",
-              background: "rgba(255, 255, 255, 0.8)",
-              borderRadius: "15px",
-              minWidth: "250px",
-            }}
-          >
-            <h3 style={{ color: "var(--navy)", marginBottom: "1rem" }}>
-              Creative Studio
-            </h3>
-            <p style={{ color: "#666", marginBottom: "1.5rem" }}>
-              Design and marketing services for modern businesses
-            </p>
-            <button
-              className="cta-button"
-              onClick={() => handleNavigateToNegocio(2)} // Aqui se le manda DOS a la funcion para que le pase el parametro
-              style={{ fontSize: "0.9rem", padding: "0.8rem 1.5rem" }}
-            >
-              View Business #2
-            </button>
-          </div>
+      <div className="empresa-banner">
+        <img
+          src={EmpresaBanner}
+          alt="Descripción empresa"
+          className="empresa-imagen"
+        />
+        <div className="empresa-descripcion">
+          <h1>Bienvenido a BookingStore</h1>
+          <p>
+            Tu plataforma central para reservar servicios y gestionar negocios
+            fácilmente. Descubre nuestras categorías principales y encuentra el
+            negocio ideal para ti.
+          </p>
         </div>
+      </div>
+
+      <div className="categorias-grid">
+        {categorias.map((categoria) => (
+          <div
+            key={categoria.id}
+            className="categoria-card"
+            onClick={() => handleNavigateToCategoria(categoria.id)}
+          >
+            <img
+              src={categoria.imagen}
+              className="categoria-imagen"
+            />
+          </div>
+        ))}
       </div>
     </main>
   );
@@ -100,19 +91,22 @@ function App() {
         <Navbar />
         <Routes>
           <Route path="/" element={<HomePage />} />
-          <Route path="/negocio/:id" element={<NegociosEspecificos />} />
+          <Route
+            path="/categoria/:id"
+            element={<NegociosEspecificosPorCategoria />}
+          />
+          <Route
+            path="/negocio-especifico/:id"
+            element={<NegocioEspecifico />}
+          />
           <Route path="/forms/login" element={<Login />} />
           <Route path="/forms/registers" element={<Register />} />
-          <Route path="/forms/registersusers" element={<RegisterUser />} />
-
-          
+          <Route path="/forms/registersusers" element={<RegisterUser />} 
         </Routes>
         <Footer />
       </div>
     </Router>
-  )
-  }
-
-
+  );
+}
 
 export default App;
