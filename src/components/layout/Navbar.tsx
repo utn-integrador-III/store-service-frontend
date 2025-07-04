@@ -96,7 +96,7 @@ const Navbar: React.FC = () => {
             </button>
             <button
               className="btn-signup"
-              onClick={() => handleNavigation("/forms/register")}
+              onClick={() => handleNavigation("/forms/registers")}
             >
               Sign Up
             </button>
