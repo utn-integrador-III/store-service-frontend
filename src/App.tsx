@@ -13,8 +13,33 @@ import NegocioEspecifico from "./components/pages/company/Negocio_Especifico";
 import Login from "./components/pages/forms/login/Login";
 import Register from "./components/pages/forms/registers/registerenterprise";
 
+import ClinicImg from "./assets/images/Clinics.png";
+import RestaurantImg from "./assets/images/Restaurant.png";
+import HotelImg from "./assets/images/Hotels.png";
+import BarbershopImg from "./assets/images/Barbershop.png";
+import EmpresaBanner from "./assets/images/empresa.jpg"; 
+
 function HomePage() {
   const navigate = useNavigate();
+
+  const categorias = [
+    {
+      id: 1,
+      imagen: ClinicImg,
+    },
+    {
+      id: 2,
+      imagen: RestaurantImg,
+    },
+    {
+      id: 3,
+      imagen: HotelImg,
+    },
+    {
+      id: 4,
+      imagen: BarbershopImg,
+    },
+  ];
 
   const handleNavigateToCategoria = (categoryId: number) => {
     navigate(`/categoria/${categoryId}`);
@@ -24,7 +49,7 @@ function HomePage() {
     <main className="main-content">
       <div className="empresa-banner">
         <img
-          src="/images/2d85f6ff-64b6-42c1-87ce-e397aa8f8461.png"
+          src={EmpresaBanner}
           alt="Descripción empresa"
           className="empresa-imagen"
         />
@@ -39,18 +64,16 @@ function HomePage() {
       </div>
 
       <div className="categorias-grid">
-        {[1, 2, 3, 4].map((id) => (
+        {categorias.map((categoria) => (
           <div
-            key={id}
+            key={categoria.id}
             className="categoria-card"
-            onClick={() => handleNavigateToCategoria(id)}
+            onClick={() => handleNavigateToCategoria(categoria.id)}
           >
             <img
-              src={`/images/categoria${id}.png`}
-              alt={`Categoría ${id}`}
+              src={categoria.imagen}
               className="categoria-imagen"
             />
-            <h4>Categoría {id}</h4>
           </div>
         ))}
       </div>
