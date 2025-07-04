@@ -9,7 +9,8 @@ import {
 import "./App.css";
 import Navbar from "./components/layout/Navbar";
 import Footer from "./components/layout/Footer";
-import NegociosEspecificos from "./components/pages/company/Negocios_Especificos";
+import NegociosEspecificosPorCategoria from "./components/pages/company/Negocios_Especificos_por_categoria";
+import NegocioEspecifico from "./components/pages/company/Negocio_Especifico";
 import Login from "./components/pages/forms/login/Login";
 import Register from "./components/pages/forms/registers/registerenterprise";
 
@@ -58,7 +59,6 @@ function HomePage() {
   );
 }
 
-
 // Para llevar a las distintas pantallas, se agregan en "route"
 function App() {
   return (
@@ -67,17 +67,48 @@ function App() {
         <Navbar />
         <Routes>
           <Route path="/" element={<HomePage />} />
-          <Route path="/negocio/:id" element={<NegociosEspecificos />} />
+          <Route
+            path="/categoria/:id"
+            element={<NegociosEspecificosPorCategoria />}
+          />
+          <Route
+            path="/negocio-especifico/:id"
+            element={<NegocioEspecifico />}
+          />
           <Route path="/forms/login" element={<Login />} />
           <Route path="/forms/registers" element={<Register />} />
-          
         </Routes>
         <Footer />
       </div>
     </Router>
-  )
-  }
+  );
+}
 
+
+import React from 'react';
+import logo from './logo.svg';
+import './App.css';
+
+function App() {
+  return (
+    <div className="App">
+      <header className="App-header">
+        <img src={logo} className="App-logo" alt="logo" />
+        <p>
+          Edit <code>src/App.tsx</code> and save to reload.
+        </p>
+        <a
+          className="App-link"
+          href="https://reactjs.org"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Learn React
+        </a>
+      </header>
+    </div>
+  );
+}
 
 
 export default App;
