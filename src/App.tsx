@@ -25,19 +25,19 @@ function HomePage() {
 
   const categorias = [
     {
-      id: 1,
+      id: 2,
       imagen: ClinicImg,
     },
     {
-      id: 2,
+      id: 1,
       imagen: RestaurantImg,
     },
     {
-      id: 3,
+      id: 4,
       imagen: HotelImg,
     },
     {
-      id: 4,
+      id: 3,
       imagen: BarbershopImg,
     },
   ];
