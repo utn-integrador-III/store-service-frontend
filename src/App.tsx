@@ -12,12 +12,12 @@ import NegociosEspecificosPorCategoria from "./components/pages/company/Negocios
 import NegocioEspecifico from "./components/pages/company/Negocio_Especifico";
 import Login from "./components/pages/forms/login/Login";
 import Register from "./components/pages/forms/registers/registerenterprise";
-
+import EnterpriseDetailView from "./components/pages/company/EnterpriseDetailView";
 import ClinicImg from "./assets/images/Clinics.png";
 import RestaurantImg from "./assets/images/Restaurant.png";
 import HotelImg from "./assets/images/Hotels.png";
 import BarbershopImg from "./assets/images/Barbershop.png";
-import EmpresaBanner from "./assets/images/empresa.jpg"; 
+import EmpresaBanner from "./assets/images/empresa.jpg";
 import RegisterUser from "./components/pages/forms/registers/registeruser";
 
 function HomePage() {
@@ -74,6 +74,7 @@ function HomePage() {
             <img
               src={categoria.imagen}
               className="categoria-imagen"
+              alt={`Categoría ${categoria.id}`}
             />
           </div>
         ))}
@@ -95,9 +96,10 @@ function App() {
             element={<NegociosEspecificosPorCategoria />}
           />
           <Route
-            path="/negocio-especifico/:id"
-            element={<NegocioEspecifico />}
+         path="/specific-enterprise/:id"
+         element={<EnterpriseDetailView />}
           />
+          
           <Route path="/forms/login" element={<Login />} />
           <Route path="/forms/registers" element={<Register />} />
           <Route path="/forms/registersusers" element={<RegisterUser />} />

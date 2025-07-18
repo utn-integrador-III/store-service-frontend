@@ -1,5 +1,5 @@
 // API Configuration  
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || '';
+const API_BASE_URL =  "http://127.0.0.1:8000/api/v1";
 
 export const API_ENDPOINTS = {
   // Enterprise endpoints
@@ -8,7 +8,6 @@ export const API_ENDPOINTS = {
   EMPRESA_FILTRO_POR_CATEGORIA: (id_categoria: string) =>
     `${API_BASE_URL}/EMPRESA_FILTRO_POR_CATEGORIA/${id_categoria}`,
 
-  //para obtener la informacion de la empresa en especifico (dayron)
   EMPRESA_ESPECIFICA: (id: string) =>
     `${API_BASE_URL}/EMPRESA_ESPECIFICA/${id}`,
 };
