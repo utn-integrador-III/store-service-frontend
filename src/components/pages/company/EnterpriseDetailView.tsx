@@ -36,13 +36,14 @@ const EnterpriseDetailView = () => {
       try {
         setLoading(true);
         setError(null);
-        const response = await fetch(API_ENDPOINTS.EMPRESA_ESPECIFICA(id));
+        const response = await fetch(API_ENDPOINTS.GET_ENTERPRISE_BY_ID(id));
         if (!response.ok) {
           const errorData = await response.json();
-          throw new Error(errorData.detail || `HTTP error! status: ${response.status}`);
+          throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
         }
         const data = await response.json();
-        setEnterprise(data);
+        setEnterprise(data.data);
+
       } catch (err: any) {
         console.error("Error fetching enterprise details:", err);
         setError(err.message || "Failed to load enterprise data. Please try again later.");
@@ -53,7 +54,6 @@ const EnterpriseDetailView = () => {
     fetchEnterpriseDetails();
   }, [id]);
 
-  // --- Textos para el usuario en Español ---
   if (loading) return <div className="loading-spinner">Cargando...</div>;
   if (error) return <div className="error-message"><strong>Error:</strong> {error}</div>;
   if (!enterprise) return <div className="no-enterprises">Empresa no encontrada.</div>;
