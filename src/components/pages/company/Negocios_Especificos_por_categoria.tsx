@@ -3,7 +3,8 @@ import { useParams, useNavigate } from "react-router-dom";
 import { API_ENDPOINTS } from "../../../utilities/apis/apiConfig";
 import "../../../styles/negocios-especificos.css";
 
-// Simple interface for enterprise data
+import { showError } from "../../../utilities/apis/alerts";
+
 interface Enterprise {
   _id: string;
   nombre_empresa: string;
@@ -30,8 +31,6 @@ const Negocios_Especificos_por_categoria = () => {
     navigate("/");
   };
 
-  // Category mapping based on ID
-
   const getCategoryName = (categoryId: string): string => {
     const categories: { [key: string]: string } = {
       "1": "Restaurantes",
@@ -46,6 +45,7 @@ const Negocios_Especificos_por_categoria = () => {
     const fetchEnterprises = async () => {
       if (!id) {
         setError("ID de categoría no válido");
+        showError("Error de Navegación", "El ID de la categoría no es válido."); 
         setLoading(false);
         return;
       }
@@ -57,7 +57,6 @@ const Negocios_Especificos_por_categoria = () => {
 
         console.log("Fetching enterprises for category ID:", id);
 
-        // Direct API call to FastAPI backend using configuration
         const response = await fetch(
           API_ENDPOINTS.EMPRESA_FILTRO_POR_CATEGORIA(id)
         );
@@ -71,6 +70,7 @@ const Negocios_Especificos_por_categoria = () => {
       } catch (err) {
         console.error("Error fetching enterprises:", err);
         setError("Error al cargar las empresas. Por favor, intenta de nuevo.");
+        showError("Error de Conexión", "No se pudieron cargar las empresas. Revisa tu conexión o intenta más tarde."); 
       } finally {
         setLoading(false);
       }
