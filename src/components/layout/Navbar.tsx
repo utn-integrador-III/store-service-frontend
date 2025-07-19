@@ -90,6 +90,12 @@ const Navbar: React.FC = () => {
           <div className="navbar-actions">
             <button
               className="btn-login"
+              onClick={() => handleNavigation("/profile")}
+            >
+              Mi Perfil
+            </button>
+            <button
+              className="btn-login"
               onClick={() => handleNavigation("/forms/login")}
             >
               Login

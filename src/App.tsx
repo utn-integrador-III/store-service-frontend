@@ -12,12 +12,13 @@ import NegociosEspecificosPorCategoria from "./components/pages/company/Negocios
 import NegocioEspecifico from "./components/pages/company/Negocio_Especifico";
 import Login from "./components/pages/forms/login/Login";
 import Register from "./components/pages/forms/registers/registerenterprise";
+import MyProfile from "./components/pages/user/MyProfile";
 
 import ClinicImg from "./assets/images/Clinics.png";
 import RestaurantImg from "./assets/images/Restaurant.png";
 import HotelImg from "./assets/images/Hotels.png";
 import BarbershopImg from "./assets/images/Barbershop.png";
-import EmpresaBanner from "./assets/images/empresa.jpg"; 
+import EmpresaBanner from "./assets/images/empresa.jpg";
 import RegisterUser from "./components/pages/forms/registers/registeruser";
 
 function HomePage() {
@@ -101,6 +102,7 @@ function App() {
           <Route path="/forms/login" element={<Login />} />
           <Route path="/forms/registers" element={<Register />} />
           <Route path="/forms/registersusers" element={<RegisterUser />} />
+          <Route path="/profile" element={<MyProfile />} />
 
         </Routes>
         <Footer />
