@@ -1,11 +1,13 @@
 import React, { useState, ChangeEvent, FormEvent } from "react";
 import '../../../../styles/registerenterprise.css';
+import { showError, showSuccess } from "../../../../utilities/apis/alerts";
 
 interface UserFormData {
   nombre: string;
   apellido: string;
   correo: string;
   contrasena: string;
+  confirmarContrasena: string;
 }
 
 export default function UserRegisterForm() {
@@ -14,17 +16,36 @@ export default function UserRegisterForm() {
     apellido: "",
     correo: "",
     contrasena: "",
+    confirmarContrasena: "",
   });
 
-  const handleChange = (
-    e: ChangeEvent<HTMLInputElement>
-  ) => {
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    const { nombre, apellido, correo, contrasena, confirmarContrasena } = formData;
+
+    const emailRegex = /\S+@\S+\.\S+/;
+
+    if (!nombre || !apellido || !correo || !contrasena || !confirmarContrasena) {
+      showError('Formulario Incompleto', 'Por favor, rellena todos los campos.');
+      return;
+    }
+    
+    if (!emailRegex.test(correo)) {
+      showError('Correo Inválido', 'Por favor, ingresa un formato de correo electrónico válido.');
+      return;
+    }
+
+    if (contrasena !== confirmarContrasena) {
+      showError('Error de Contraseña', 'Las contraseñas no coinciden.');
+      return;
+    }
+
+    showSuccess('¡Registro Exitoso!', 'Tu cuenta ha sido creada correctamente.');
     console.log(formData);
   };
 
@@ -32,7 +53,6 @@ export default function UserRegisterForm() {
     <div className="form-wrapper">
       <form onSubmit={handleSubmit} className="form-container">
         <h2 className="form-title">Registro de Usuario</h2>
-
         <div className="form-group">
           <input
             type="text"
@@ -41,9 +61,7 @@ export default function UserRegisterForm() {
             value={formData.nombre}
             onChange={handleChange}
             className="form-control"
-            required
           />
-
           <input
             type="text"
             name="apellido"
@@ -51,19 +69,16 @@ export default function UserRegisterForm() {
             value={formData.apellido}
             onChange={handleChange}
             className="form-control"
-            required
           />
-
+          {}
           <input
-            type="email"
+            type="text" 
             name="correo"
             placeholder="Correo electrónico"
             value={formData.correo}
             onChange={handleChange}
             className="form-control"
-            required
           />
-
           <input
             type="password"
             name="contrasena"
@@ -71,10 +86,16 @@ export default function UserRegisterForm() {
             value={formData.contrasena}
             onChange={handleChange}
             className="form-control"
-            required
+          />
+          <input
+            type="password"
+            name="confirmarContrasena"
+            placeholder="Confirmar Contraseña"
+            value={formData.confirmarContrasena}
+            onChange={handleChange}
+            className="form-control"
           />
         </div>
-
         <button type="submit" className="submit-btn">
           Registrarse
         </button>

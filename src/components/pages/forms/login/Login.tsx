@@ -1,23 +1,35 @@
 import React, { useState } from 'react';
 import '../../../../styles/login.css';
-/**
- login
- */
+import { showError, showSuccess } from '../../../../utilities/apis/alerts';
+
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  // Handle the form submission event
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+    e.preventDefault(); 
+
+    const emailRegex = /\S+@\S+\.\S+/;
+
+    if (!email || !password) {
+      showError('Campos Incompletos', 'Por favor, ingresa tu correo y contraseña.');
+      return;
+    }
+
+    if (!emailRegex.test(email)) {
+      showError('Correo Inválido', 'Por favor, introduce una dirección de correo válida.');
+      return;
+    }
+
     console.log('Login attempt with:', { email, password });
-    alert('Login simulation successful!');
+    showSuccess('¡Inicio de Sesión Exitoso!', 'Has ingresado correctamente.');
   };
 
   return (
     <div className="login-container">
       <div className="login-form-wrapper">
-        <form className="login-form" onSubmit={handleSubmit}>
+        {}
+        <form className="login-form" onSubmit={handleSubmit} noValidate>
           <h1>Sign In</h1>
 
           <div className="input-group">
@@ -27,7 +39,6 @@ const Login = () => {
               aria-label="Email or phone number"
               value={email}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
-              required
             />
           </div>
 
@@ -38,7 +49,6 @@ const Login = () => {
               aria-label="Password"
               value={password}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)}
-              required
             />
           </div>
 
