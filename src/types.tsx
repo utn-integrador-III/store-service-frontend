@@ -1,5 +1,6 @@
 
 export type ExtendedPage = 'home' | 'businessDetails';
+export type Page = 'login' | 'home';
 
 export interface Category {
     id: string;
@@ -17,4 +18,14 @@ export interface Business {
     photos: string[];
     categories: string[];
     status: 'draft' | 'published';
+}
+
+export interface UserResponse {
+    id: string;
+    _id?: string;
+    email: string;
+    full_name?: string;
+    phone_number?: string;
+    created_at: string;
+    role: 'usuario' | 'dueño' | 'admin';
 }
