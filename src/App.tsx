@@ -5,6 +5,8 @@ import { ExtendedPage, Page } from './types';
 import { LoginPage } from './pages/LoginPage';
 import { ProfilePage } from './pages/ProfilePage';
 import './styles/App.module.css';
+import { OwnerDashboardPage } from './pages/OwnerDashboardPage';
+
 
 function App() {
   
@@ -26,6 +28,7 @@ function App() {
       <main className="mainContent">
         {currentPage === 'login' && <LoginPage navigateTo={navigateTo} />}
         {currentPage === 'home' && <HomePage navigateTo={navigateTo} />}
+        <OwnerDashboardPage />
         {/* Aquí podrías agregar un componente para businessDetails */}
       </main>
     </AuthProvider>

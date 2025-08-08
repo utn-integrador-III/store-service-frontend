@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from 'react-leaflet';
 import L from 'leaflet';
@@ -24,15 +23,15 @@ const MapEventsManager = ({ onPositionChange, markerPosition }: { onPositionChan
     },
   });
 
+  
   useEffect(() => {
     if (markerPosition) {
-      map.flyTo(markerPosition, 15);
+      map.flyTo(markerPosition, 15); 
     }
   }, [markerPosition, map]);
 
   return null;
 };
-
 
 
 interface LocationPickerProps {
@@ -68,7 +67,7 @@ export const LocationPicker: React.FC<LocationPickerProps> = ({ onLocationSelect
 
 
     const handlePositionChange = async (pos: L.LatLng) => {
-        setMarkerPosition(pos); 
+        setMarkerPosition(pos);
 
         try {
             const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${pos.lat}&lon=${pos.lng}`);
