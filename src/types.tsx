@@ -28,4 +28,13 @@ export interface UserResponse {
     phone_number?: string;
     created_at: string;
     role: 'usuario' | 'dueño' | 'admin';
+    owner_request?: OwnerRequest;
+}
+
+export interface OwnerRequest {
+    business_name: string;
+    business_description: string;
+    address: string;
+    logo_url?: string;
+    status: 'pending' | 'approved' | 'rejected';
 }
