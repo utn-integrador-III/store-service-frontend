@@ -28,7 +28,12 @@ export interface UserResponse {
     phone_number?: string;
     created_at: string;
     role: 'usuario' | 'dueño' | 'admin';
-    owner_request?: OwnerRequest;
+    owner_request?: {
+        business_name: string;
+        business_description: string;
+        address: string;
+        logo_url?: string;
+    };
 }
 
 export interface OwnerRequest {
@@ -37,4 +42,13 @@ export interface OwnerRequest {
     address: string;
     logo_url?: string;
     status: 'pending' | 'approved' | 'rejected';
+}
+
+
+export interface CategoryRequest {
+    id: string;
+    _id?: string;
+    category_name: string;
+    reason: string;
+    evidence_url?: string;
 }

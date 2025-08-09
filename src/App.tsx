@@ -4,7 +4,7 @@ import { AuthProvider } from './context/AuthProvider';
 import { ExtendedPage, Page } from './types'; 
 import { LoginPage } from './pages/LoginPage';
 import { ProfilePage } from './pages/ProfilePage';
-import { RegisterPage } from '@/pages/RegisterPage';
+import { RegisterPage } from './pages/RegisterPage';
 import './styles/App.module.css';
 import { OwnerDashboardPage } from './pages/OwnerDashboardPage';
 
@@ -28,7 +28,6 @@ function App() {
   return (
     <AuthProvider>
       <main className="mainContent">
-        <RegisterPage navigateTo={navigateTo} />
         {currentPage === 'home' && <HomePage navigateTo={navigateTo} />}
         <OwnerDashboardPage />
       </main>
