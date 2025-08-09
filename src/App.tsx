@@ -4,6 +4,7 @@ import { AuthProvider } from './context/AuthProvider';
 import { ExtendedPage, Page } from './types'; 
 import { LoginPage } from './pages/LoginPage';
 import { ProfilePage } from './pages/ProfilePage';
+import { AdminPage } from '@/pages/AdminPage';
 import './styles/App.module.css';
 import { OwnerDashboardPage } from './pages/OwnerDashboardPage';
 
