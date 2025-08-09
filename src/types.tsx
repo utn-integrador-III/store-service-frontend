@@ -1,6 +1,6 @@
 
 export type ExtendedPage = 'home' | 'businessDetails';
-export type Page = 'login' | 'home';
+export type Page = 'register'| 'login' | 'home';
 
 export interface Category {
     id: string;
