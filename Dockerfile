@@ -1,35 +1,27 @@
-# Etapa 1: build con Node.js
-FROM node:18-alpine AS build
-
+# ---------- Build ----------
+FROM node:20-alpine AS build
 WORKDIR /app
 
-# Copiar archivos para instalar dependencias
-COPY package.json package-lock.json ./
-RUN npm install
+COPY package*.json ./
+RUN npm ci
 
-# Copiar todo el proyecto (incluye src y public)
 COPY . .
-
-# Permitir pasar variable para build (ejemplo: VITE_API_URL)
-ARG VITE_API_URL
-ENV VITE_API_URL=$VITE_API_URL
-
-# Ejecutar build (tsc + vite build)
 RUN npm run build
 
-# Etapa 2: servir con nginx
-FROM nginx:alpine
+# ---------- Runtime (Nginx) ----------
+FROM nginx:1.27-alpine
+WORKDIR /usr/share/nginx/html
 
-# Copiar build estático
-COPY --from=build /app/dist /usr/share/nginx/html
+# Copia build
+COPY --from=build /app/dist ./
 
-# Copiar configuración custom nginx para soporte variables runtime
-COPY nginx.conf /etc/nginx/nginx.conf
+# Config SPA
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-# Copiar script que genera archivo env.js en runtime
-COPY env.sh /docker-entrypoint.d/env.sh
-RUN chmod +x /docker-entrypoint.d/env.sh
+# Script de arranque para inyectar env en runtime
+COPY env.sh /env.sh
+# Evita problemas de CRLF en Windows y asegúralo ejecutable
+RUN sed -i 's/\r$//' /env.sh && chmod +x /env.sh
 
 EXPOSE 80
-
-CMD ["nginx", "-g", "daemon off;"]
+CMD ["/bin/sh", "/env.sh"]

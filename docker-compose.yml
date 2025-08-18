@@ -1,13 +1,11 @@
-version: '3.8'
-
 services:
-  frontend:
-    build:
-      context: .
-      args:
-        VITE_API_URL: ${VITE_API_URL}  # Para build time (vite)
+  web:
+    build: .
+    container_name: store-frontend
     ports:
-      - "3000:80"
+      - "5173:80"      # abre en http://localhost:5173
     environment:
-      API_URL: ${API_URL}  # Para runtime (nginx env.js)
-    restart: unless-stopped   
+      API_BASE_URL: "http://localhost:8000"
+      APP_NAME: "Store Service"
+      NODE_ENV: "production"
+    restart: unless-stopped

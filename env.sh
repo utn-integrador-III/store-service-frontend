@@ -1,10 +1,13 @@
 #!/bin/sh
+set -eu
+DOCROOT="/usr/share/nginx/html"
 
-# Generar env.js con variables de entorno para frontend en runtime
-cat <<EOF > /usr/share/nginx/html/env.js
-window.env = {
-  API_URL: "${API_URL}"
+cat > "${DOCROOT}/env.js" <<EOF
+window.__ENV__ = {
+  API_BASE_URL: "${API_BASE_URL:-http://localhost:8000}",
+  APP_NAME: "${APP_NAME:-Store Service}",
+  NODE_ENV: "${NODE_ENV:-production}"
 };
 EOF
 
-exec "$@"
+exec nginx -g "daemon off;"
