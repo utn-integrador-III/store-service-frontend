@@ -1,98 +1,77 @@
-import React, { useState, useEffect } from 'react';
-import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from 'react-leaflet';
-import L from 'leaflet';
+import React, { useState, useEffect, useCallback } from 'react';
+import { GoogleMap, Marker } from '@react-google-maps/api';
 
-import 'leaflet/dist/leaflet.css';
-
-// @ts-ignore
-delete L.Icon.Default.prototype._getIconUrl;
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon-2x.png',
-  iconUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png',
-  shadowUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png',
-});
-
-
-
-const MapEventsManager = ({ onPositionChange, markerPosition }: { onPositionChange: (pos: L.LatLng) => void, markerPosition: L.LatLng | null }) => {
-  const map = useMap();
-
-  useMapEvents({
-    click(e) {
-      onPositionChange(e.latlng);
-    },
-  });
-
-  
-  useEffect(() => {
-    if (markerPosition) {
-      map.flyTo(markerPosition, 15); 
-    }
-  }, [markerPosition, map]);
-
-  return null;
+const containerStyle: React.CSSProperties = {
+  height: '300px',
+  width: '100%',
+  borderRadius: '0.5rem',
+  overflow: 'hidden',
+  border: '1px solid #d1d5db'
 };
 
+const costaRicaCenter = {
+  lat: 9.934739,
+  lng: -84.087502
+};
 
 interface LocationPickerProps {
-    onLocationSelect: (address: string) => void;
-    initialAddress?: string; 
+  onLocationSelect: (address: string) => void;
+  initialAddress?: string;
 }
 
 export const LocationPicker: React.FC<LocationPickerProps> = ({ onLocationSelect, initialAddress }) => {
-    const costaRicaPosition: L.LatLngTuple = [9.934739, -84.087502];
-    
-    const [markerPosition, setMarkerPosition] = useState<L.LatLng | null>(null);
-    const [mapCenter, setMapCenter] = useState<L.LatLngTuple>(costaRicaPosition);
+  const [markerPosition, setMarkerPosition] = useState<google.maps.LatLngLiteral | null>(null);
+  const [mapCenter, setMapCenter] = useState<google.maps.LatLngLiteral>(costaRicaCenter);
 
-    useEffect(() => {
-        const geocodeInitialAddress = async () => {
-            if (initialAddress) {
-                try {
-                    const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(initialAddress)}`);
-                    const data = await response.json();
-                    if (data && data.length > 0) {
-                        const { lat, lon } = data[0];
-                        const initialPos: L.LatLngTuple = [parseFloat(lat), parseFloat(lon)];
-                        setMapCenter(initialPos);
-                        setMarkerPosition(new L.LatLng(initialPos[0], initialPos[1]));
-                    }
-                } catch (error) {
-                    console.error("Error al geocodificar la dirección inicial:", error);
-                }
-            }
-        };
-        geocodeInitialAddress();
-    }, [initialAddress]);
-
-
-    const handlePositionChange = async (pos: L.LatLng) => {
-        setMarkerPosition(pos);
-
-        try {
-            const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${pos.lat}&lon=${pos.lng}`);
-            const data = await response.json();
-            
-            if (data && data.display_name) {
-                onLocationSelect(data.display_name);
-            }
-        } catch (error) {
-            console.error("Error al obtener la dirección:", error);
-            onLocationSelect(`Lat: ${pos.lat.toFixed(5)}, Lng: ${pos.lng.toFixed(5)}`);
+  useEffect(() => {
+    if (initialAddress && window.google) {
+      const geocoder = new window.google.maps.Geocoder();
+      geocoder.geocode({ address: initialAddress }, (results, status) => {
+        if (status === 'OK' && results?.[0]) {
+          const location = results[0].geometry.location;
+          const newPos = { lat: location.lat(), lng: location.lng() };
+          setMapCenter(newPos);
+          setMarkerPosition(newPos);
         }
-    };
+      });
+    }
+  }, [initialAddress]);
 
-    return (
-        <div style={{ height: '300px', width: '100%', borderRadius: '0.5rem', overflow: 'hidden', border: '1px solid #d1d5db' }}>
-            <MapContainer center={mapCenter} zoom={markerPosition ? 15 : 7} style={{ height: '100%', width: '100%' }}>
-                <TileLayer
-                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                />
-                <MapEventsManager onPositionChange={handlePositionChange} markerPosition={markerPosition} />
-                
-                {markerPosition && <Marker position={markerPosition}></Marker>}
-            </MapContainer>
-        </div>
-    );
+  const handleMapClick = useCallback((e: google.maps.MapMouseEvent) => {
+    if (e.latLng) {
+      const newPos = { lat: e.latLng.lat(), lng: e.latLng.lng() };
+      
+
+      setMarkerPosition(newPos);
+      
+
+
+      setMapCenter(newPos);
+
+      const geocoder = new window.google.maps.Geocoder();
+      geocoder.geocode({ location: newPos }, (results, status) => {
+        if (status === 'OK' && results?.[0]) {
+          onLocationSelect(results[0].formatted_address);
+        } else {
+          onLocationSelect(`Lat: ${newPos.lat.toFixed(5)}, Lng: ${newPos.lng.toFixed(5)}`);
+        }
+      });
+    }
+  }, [onLocationSelect]);
+
+  return (
+    <GoogleMap
+      mapContainerStyle={containerStyle}
+      center={mapCenter}
+      zoom={markerPosition ? 15 : 7}
+      onClick={handleMapClick}
+      options={{
+        fullscreenControl: false,
+        streetViewControl: false,
+        mapTypeControl: false,
+      }}
+    >
+      {markerPosition && <Marker position={markerPosition} />}
+    </GoogleMap>
+  );
 };
