@@ -1,4 +1,5 @@
 
+
 import React, { useState, ReactNode, useEffect, useCallback } from 'react';
 import { AuthContext } from './AuthContext';
 import { API_BASE_URL } from '@/services/api';
@@ -8,14 +9,17 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const [token, setToken] = useState<string | null>(null);
     const [user, setUser] = useState<UserResponse | null>(null);
     const [isAdmin, setIsAdmin] = useState<boolean>(false);
-    const [isLoading, setIsLoading] = useState<boolean>(true); 
+    const [isLoading, setIsLoading] = useState<boolean>(true);
 
     const fetchUser = useCallback(async () => {
         const currentToken = localStorage.getItem("servibook_token");
         if (!currentToken) {
+            setUser(null);
+            setIsAdmin(false);
             setIsLoading(false);
             return;
         }
+        
         try {
             const response = await fetch(`${API_BASE_URL}/users/me`, {
                 headers: { 'Authorization': `Bearer ${currentToken}` },
@@ -25,10 +29,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                 setUser(data);
                 setIsAdmin(data.role === 'admin');
             } else {
-                logout(); 
+                logout();
             }
         } catch (error) {
-            console.error("Error al obtener datos del usuario:", error);
+            console.error("Error al obtener los datos del usuario:", error);
             logout();
         } finally {
             setIsLoading(false);
@@ -38,7 +42,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     useEffect(() => {
         const initialToken = localStorage.getItem("servibook_token");
         setToken(initialToken);
-        fetchUser(); 
+        fetchUser();
     }, [fetchUser]);
 
     const login = (newToken: string) => {
@@ -53,11 +57,13 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         setUser(null);
         setIsAdmin(false);
     };
-
-    if (isLoading) {
-        return <div style={{textAlign: 'center', padding: '3rem'}}>Cargando...</div>;
-    }
     
+    if (isLoading) {
+        return <div style={{textAlign: 'center', padding: '3rem', fontSize: '1.2rem'}}>Cargando sesión...</div>;
+    }
+
+
+
     return (
         <AuthContext.Provider value={{ token, user, isAdmin, login, logout, fetchUser }}>
             {children}
