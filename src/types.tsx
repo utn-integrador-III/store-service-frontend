@@ -25,10 +25,19 @@ export interface Business {
   schedule?: any;
   appointment_mode?: 'generico' | 'por_empleado';
 
-  owner_id?: string;        
-  rating_avg?: number;      
-  rating_count?: number;    
+  owner_id?: string;
+
+  // renombrados para coincidir con ListingCard
+  avg_rating?: number;
+  reviews_count?: number;
 }
+
+export type Category = {
+  id?: string;
+  _id?: string;
+  name: string;
+  icon_name?: string; // agregado para CategoryCard
+};
 
 export interface Appointment {
   id?: string; _id?: string;
@@ -39,7 +48,7 @@ export interface Appointment {
   employee_id?: string | null;
 }
 
-export type Category = { id?: string; _id?: string; name: string };
+
 
 export type Employee = {
   id: string;
