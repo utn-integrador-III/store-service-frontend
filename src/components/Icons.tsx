@@ -1,6 +1,48 @@
+import { SvgIcon } from '@mui/material';
+import SvgIconComponent from '@mui/material/SvgIcon';
+import * as MuiIcons from '@mui/icons-material';
 
-import React from 'react';
+// --- ÍCONO DE GOOGLE RESTAURADO ---
+export function GoogleIcon() {
+  return (
+    <SvgIcon>
+      <svg
+        width="16"
+        height="16"
+        viewBox="0 0 16 16"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M15.68 8.18182C15.68 7.61455 15.6291 7.06909 15.5345 6.54545H8V9.64364H12.3055C12.1164 10.64 11.5491 11.4836 10.6982 12.0509V14.0655H13.2945C14.8073 12.6691 15.68 10.6182 15.68 8.18182Z"
+          fill="#4285F4"
+        />
+        <path
+          d="M8 16C10.16 16 11.9709 15.2873 13.2945 14.0655L10.6982 12.0509C9.98545 12.5309 9.07636 12.8218 8 12.8218C5.92 12.8218 4.15273 11.4182 3.52 9.52727H0.858182V11.5927C2.17455 14.2036 4.87273 16 8 16Z"
+          fill="#34A853"
+        />
+        <path
+          d="M3.52 9.52C3.36 9.04 3.26545 8.53091 3.26545 8C3.26545 7.46909 3.36 6.96 3.52 6.48V4.41455H0.858182C0.312727 5.49091 0 6.70545 0 8C0 9.29455 0.312727 10.5091 0.858182 11.5855L2.93091 9.97091L3.52 9.52Z"
+          fill="#FBBC05"
+        />
+        <path
+          d="M8 3.18545C9.17818 3.18545 10.2255 3.59273 11.0618 4.37818L13.3527 2.08727C11.9636 0.792727 10.16 0 8 0C4.87273 0 2.17455 1.79636 0.858182 4.41455L3.52 6.48C4.15273 4.58909 5.92 3.18545 8 3.18545Z"
+          fill="#EA4335"
+        />
+      </svg>
+    </SvgIcon>
+  );
+}
 
-export const SearchIcon: React.FC = () => ( <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg> );
-export const MapPinIcon: React.FC = () => ( <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg> );
-export const StarIcon: React.FC<{className?: string}> = ({ className }) => ( <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" className={className}><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"></path></svg> );
+
+export const iconMap: { [key: string]: typeof SvgIconComponent } = {
+  ...(MuiIcons as { [key: string]: typeof SvgIconComponent }), 
+  'default': MuiIcons.Storefront, 
+};
+
+
+export const StarIcon = MuiIcons.Star;
+export const StarBorderIcon = MuiIcons.StarBorder;
+export const PeopleIcon = MuiIcons.People;
+export const LocationOnIcon = MuiIcons.LocationOn;
+export const SearchIcon = MuiIcons.Search;
