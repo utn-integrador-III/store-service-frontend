@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { API_BASE_URL } from '@/services/api';
@@ -6,11 +5,11 @@ import { Business, Category, Schedule, ScheduleDay } from '@/types';
 import { LocationPicker } from '@/components/LocationPicker';
 import { ExtendedPage } from '@/App';
 import { StarIcon } from '@/components/Icons';
-
 import {
   Box, Typography, Button, Paper, TextField, CircularProgress, Alert, Stack, Divider,
   Select, MenuItem, FormControl, InputLabel, IconButton, Chip, Checkbox, FormControlLabel, Switch,
-  Dialog, DialogTitle, DialogContent, DialogActions
+  Dialog, DialogTitle, DialogContent, DialogActions, List, ListItem, ListItemText, ListItemAvatar, Avatar,
+  Tabs, Tab 
 } from '@mui/material';
 import type { SelectChangeEvent } from '@mui/material/Select';
 import EditIcon from '@mui/icons-material/Edit';
@@ -20,6 +19,8 @@ import PublishIcon from '@mui/icons-material/Publish';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import DeleteIcon from '@mui/icons-material/Delete';
 import PeopleIcon from '@mui/icons-material/People';
+import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
+import GroupIcon from '@mui/icons-material/Group';
 
 type AppointmentMode = 'generico' | 'por_empleado';
 
@@ -30,75 +31,172 @@ interface IEmployee {
 }
 const getId = (o: { id?: string; _id?: string } | null | undefined) =>
   (o?.id as string) || (o?._id as string) || '';
+  
+interface Booking {
+    appointment_id: string;
+    user_id: string;
+    user_name: string;
+    user_email: string;
+}
+
+interface DetailedSlot {
+    time: string;
+    total_capacity: number;
+    booked_count: number;
+    is_available: boolean;
+    bookings: Booking[];
+}
+
+const BookingsModal: React.FC<{
+  open: boolean;
+  onClose: () => void;
+  slot: DetailedSlot | null;
+}> = ({ open, onClose, slot }) => {
+    if (!slot) return null;
+
+    return (
+        <Dialog open={open} onClose={onClose}>
+            <DialogTitle>Reservas para las {slot.time}</DialogTitle>
+            <DialogContent dividers>
+                {slot.bookings.length > 0 ? (
+                    <List>
+                        {slot.bookings.map(booking => (
+                            <ListItem key={booking.appointment_id}>
+                                <ListItemAvatar>
+                                    <Avatar>{(booking.user_name || 'U').charAt(0)}</Avatar>
+                                </ListItemAvatar>
+                                <ListItemText 
+                                    primary={booking.user_name}
+                                    secondary={booking.user_email}
+                                />
+                            </ListItem>
+                        ))}
+                    </List>
+                ) : (
+                    <Typography>No hay reservas para este horario.</Typography>
+                )}
+            </DialogContent>
+            <DialogActions>
+                <Button onClick={onClose}>Cerrar</Button>
+            </DialogActions>
+        </Dialog>
+    );
+};
+
 
 const EmployeeScheduleDialog: React.FC<{
   open: boolean; onClose: () => void; employee: IEmployee; businessId: string; onSaved: () => void;
 }> = ({ open, onClose, employee, businessId, onSaved }) => {
   const { token } = useAuth();
+  const [tab, setTab] = useState(0); 
+
+  
+  const [assignLoading, setAssignLoading] = useState(true);
   const [slotsByDay, setSlotsByDay] = useState<Record<string, string[]>>({});
-  const [selected, setSelected] = useState<Record<string, Set<string>>>({});
-  const [saving, setSaving] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [err, setErr] = useState('');
+  const [selectedSlots, setSelectedSlots] = useState<Record<string, Set<string>>>({});
+  const [isSaving, setIsSaving] = useState(false);
+  
+  
+  const [occupancyLoading, setOccupancyLoading] = useState(false);
+  const [detailedSlots, setDetailedSlots] = useState<DetailedSlot[]>([]);
+  const [selectedDate, setSelectedDate] = useState(() => new Date().toISOString().slice(0, 10));
+  const [viewingSlot, setViewingSlot] = useState<DetailedSlot | null>(null);
 
+  const [error, setError] = useState('');
+
+  const dayNames: Record<string, string> = {
+    monday: 'Lunes', tuesday: 'Martes', wednesday: 'Miércoles',
+    thursday: 'Jueves', friday: 'Viernes', saturday: 'Sábado', sunday: 'Domingo'
+  };
+
+  
   useEffect(() => {
-    const load = async () => {
-      setLoading(true); setErr('');
-      try {
-        const res = await fetch(`${API_BASE_URL}/businesses/${businessId}`);
-        if (!res.ok) throw new Error('No se pudo cargar horario del negocio');
-        const biz: Business & { appointment_mode?: AppointmentMode } = await res.json();
+    if (tab === 0 && open) {
+      const loadAssignableSlots = async () => {
+        setAssignLoading(true);
+        setError('');
+        try {
+          const res = await fetch(`${API_BASE_URL}/businesses/${businessId}`);
+          if (!res.ok) throw new Error('No se pudo cargar el horario del negocio');
+          const biz: Business = await res.json();
 
-        const sb: Record<string, string[]> = {};
-        const selectedInit: Record<string, Set<string>> = {};
-        const days: (keyof Schedule)[] = ['monday','tuesday','wednesday','thursday','friday','saturday','sunday'];
+          const generatedSlots: Record<string, string[]> = {};
+          const initialSelected: Record<string, Set<string>> = {};
+          const days = Object.keys(dayNames) as (keyof Schedule)[];
 
-        days.forEach((d) => {
-          const row = (biz.schedule as any)[d] as ScheduleDay;
-          if (row?.is_active) {
-            const list: string[] = [];
-            const [sH, sM] = row.open_time.split(':').map(Number);
-            const [eH, eM] = row.close_time.split(':').map(Number);
-            const startMin = sH * 60 + sM;
-            const endMin = eH * 60 + eM;
-            for (let m = startMin; m < endMin; m += row.slot_duration_minutes) {
-              const hh = String(Math.floor(m / 60)).padStart(2, '0');
-              const mm = String(m % 60).padStart(2, '0');
-              list.push(`${hh}:${mm}`);
+          days.forEach((d) => {
+            const daySchedule = biz.schedule?.[d];
+            if (daySchedule?.is_active) {
+              const slotsList: string[] = [];
+              const [sH, sM] = daySchedule.open_time.split(':').map(Number);
+              const [eH, eM] = daySchedule.close_time.split(':').map(Number);
+              let current = new Date();
+              current.setHours(sH, sM, 0, 0);
+              const end = new Date();
+              end.setHours(eH, eM, 0, 0);
+
+              while (current < end) {
+                slotsList.push(current.toTimeString().slice(0, 5));
+                current.setMinutes(current.getMinutes() + daySchedule.slot_duration_minutes);
+              }
+              generatedSlots[d] = slotsList;
+              initialSelected[d] = new Set(employee.allowed_slots?.[d] || []);
             }
-            sb[d] = list;
-            const pre = new Set<string>((employee.allowed_slots?.[d] || []).filter((t) => list.includes(t)));
-            selectedInit[d] = pre;
-          }
-        });
+          });
+          setSlotsByDay(generatedSlots);
+          setSelectedSlots(initialSelected);
+        } catch (e: any) {
+          setError(e.message);
+        } finally {
+          setAssignLoading(false);
+        }
+      };
+      void loadAssignableSlots();
+    }
+  }, [open, tab, businessId, employee.allowed_slots]);
 
-        setSlotsByDay(sb);
-        setSelected(selectedInit);
-      } catch (e: any) {
-        setErr(e.message);
-      } finally {
-        setLoading(false);
+ 
+  useEffect(() => {
+    if (tab === 1 && open) {
+      const loadOccupancy = async () => {
+        setOccupancyLoading(true);
+        setError('');
+        try {
+          const res = await fetch(`${API_BASE_URL}/businesses/${businessId}/available-slots?date=${selectedDate}&employee_id=${getId(employee)}`, {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          if (!res.ok) throw new Error('No se pudo cargar la disponibilidad del empleado.');
+          setDetailedSlots(await res.json());
+        } catch (e: any) {
+          setError(e.message);
+        } finally {
+          setOccupancyLoading(false);
+        }
+      };
+      void loadOccupancy();
+    }
+  }, [open, tab, businessId, employee, selectedDate, token]);
+
+  const handleToggleSlot = (day: string, time: string) => {
+    setSelectedSlots(prev => {
+      const newSelected = { ...prev };
+      const daySet = new Set(newSelected[day] || []);
+      if (daySet.has(time)) {
+        daySet.delete(time);
+      } else {
+        daySet.add(time);
       }
-    };
-    if (open) void load();
-  }, [open, businessId, employee]);
-
-  const toggle = (day: string, time: string) => {
-    setSelected(prev => {
-      const copy = { ...prev };
-      const set = new Set(copy[day] || []);
-      if (set.has(time)) set.delete(time); else set.add(time);
-      copy[day] = set;
-      return copy;
+      newSelected[day] = daySet;
+      return newSelected;
     });
   };
 
-  const save = async () => {
-    setSaving(true);
+  const handleSave = async () => {
+    setIsSaving(true);
     try {
       const payload = {
         allowed_slots: Object.fromEntries(
-          Object.entries(selected).map(([k, set]) => [k, Array.from(set).sort()])
+          Object.entries(selectedSlots).map(([k, set]) => [k, Array.from(set).sort()])
         ),
       };
       const res = await fetch(`${API_BASE_URL}/employees/employees/${getId(employee)}/allowed-slots`, {
@@ -106,52 +204,84 @@ const EmployeeScheduleDialog: React.FC<{
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify(payload),
       });
-      if (!res.ok) throw new Error('No se pudo guardar el horario del empleado');
-      onSaved(); onClose();
+      if (!res.ok) throw new Error('No se pudo guardar el horario del empleado.');
+      onSaved();
+      onClose();
     } catch (e: any) {
       alert(e.message);
     } finally {
-      setSaving(false);
+      setIsSaving(false);
     }
   };
 
-  const dayNames: Record<string, string> = {
-    monday: 'Lunes', tuesday: 'Martes', wednesday: 'Miércoles',
-    thursday: 'Jueves', friday: 'Viernes', saturday: 'Sábado', sunday: 'Domingo'
-  };
-
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
-      <DialogTitle>Asignar turnos a {employee.name}</DialogTitle>
-      <DialogContent dividers>
-        {err && <Alert severity="error" sx={{ mb: 2 }}>{err}</Alert>}
-        {loading ? (
-          <Box sx={{ display: 'flex', justifyContent: 'center', my: 2 }}><CircularProgress /></Box>
-        ) : (
-          <Stack spacing={2} divider={<Divider />}>
-            {Object.keys(slotsByDay).length === 0 && (
-              <Alert severity="info">Activa días en el <strong>Horario del negocio</strong> para poder asignar turnos.</Alert>
-            )}
-            {Object.entries(slotsByDay).map(([day, times]) => (
-              <Box key={day}>
-                <Typography fontWeight={700} sx={{ mb: 1 }}>{dayNames[day]}</Typography>
-                <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(92px, 1fr))', gap: 1 }}>
-                  {times.map((t) => (
-                    <Button key={t} variant={selected[day]?.has(t) ? 'contained' : 'outlined'} onClick={() => toggle(day, t)}>
-                      {t}
-                    </Button>
+    <>
+      <BookingsModal open={!!viewingSlot} onClose={() => setViewingSlot(null)} slot={viewingSlot} />
+      <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
+        <DialogTitle>Gestionar Horario de {employee.name}</DialogTitle>
+        <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+            <Tabs value={tab} onChange={(e, newValue) => setTab(newValue)} centered>
+                <Tab label="Asignar Horarios" />
+                <Tab label="Ver Ocupación Diaria" />
+            </Tabs>
+        </Box>
+        <DialogContent dividers>
+          {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+          
+          {tab === 0 && ( 
+            assignLoading ? (
+              <Box sx={{ display: 'flex', justifyContent: 'center', my: 2 }}><CircularProgress /></Box>
+            ) : (
+              <Stack spacing={2} divider={<Divider />}>
+                {Object.keys(slotsByDay).length === 0 && (
+                  <Alert severity="info">El negocio no tiene días activos en su horario general. Actívalos primero para poder asignar turnos a los empleados.</Alert>
+                )}
+                {Object.entries(slotsByDay).map(([day, times]) => (
+                  <Box key={day}>
+                    <Typography fontWeight={700} sx={{ mb: 1 }}>{dayNames[day]}</Typography>
+                    <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(92px, 1fr))', gap: 1 }}>
+                      {times.map((t) => (
+                        <Button key={t} variant={selectedSlots[day]?.has(t) ? 'contained' : 'outlined'} onClick={() => handleToggleSlot(day, t)}>
+                          {t}
+                        </Button>
+                      ))}
+                    </Box>
+                  </Box>
+                ))}
+              </Stack>
+            )
+          )}
+
+          {tab === 1 && ( 
+            <Stack spacing={2}>
+              <TextField type="date" value={selectedDate} onChange={(e) => setSelectedDate(e.target.value)} label="Seleccionar fecha" fullWidth />
+              {occupancyLoading ? (
+                 <Box sx={{ display: 'flex', justifyContent: 'center', my: 2 }}><CircularProgress /></Box>
+              ) : detailedSlots.length === 0 ? (
+                <Alert severity="info">No hay turnos asignados o disponibles para este empleado en la fecha seleccionada.</Alert>
+              ) : (
+                <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: 2 }}>
+                  {detailedSlots.map(slot => (
+                    <Paper key={slot.time} variant="outlined" sx={{ p: 2, textAlign: 'center', bgcolor: slot.is_available ? 'background.paper' : '#ffebee' }}>
+                      <Typography variant="h6" fontWeight="bold">{slot.time}</Typography>
+                      <Chip icon={<GroupIcon />} label={`${slot.booked_count} / ${slot.total_capacity}`} color={slot.is_available ? 'success' : 'error'} size="small" sx={{ my: 1 }}/>
+                      <Button size="small" variant="text" onClick={() => setViewingSlot(slot)} disabled={slot.booked_count === 0}>Ver Reservas</Button>
+                    </Paper>
                   ))}
                 </Box>
-              </Box>
-            ))}
-          </Stack>
-        )}
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={onClose}>Cancelar</Button>
-        <Button variant="contained" onClick={save} disabled={saving || loading}>Guardar</Button>
-      </DialogActions>
-    </Dialog>
+              )}
+            </Stack>
+          )}
+
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={onClose}>Cerrar</Button>
+          {tab === 0 && (
+            <Button variant="contained" onClick={handleSave} disabled={isSaving || assignLoading}>Guardar Cambios</Button>
+          )}
+        </DialogActions>
+      </Dialog>
+    </>
   );
 };
 
@@ -249,7 +379,7 @@ const EmployeeManager: React.FC<{ businessId: string }> = ({ businessId }) => {
                   label={emp.active ? 'Activo' : 'Inactivo'}
                 />
                 <Button size="small" variant="outlined" onClick={() => { setSchedFor(emp); setSchedOpen(true); }}>
-                  Asignar turnos
+                  Gestionar Horario
                 </Button>
                 <IconButton aria-label="Eliminar" onClick={() => remove(emp)} sx={{ color: '#c62828' }}>
                   <DeleteIcon fontSize="small" />
@@ -341,9 +471,10 @@ const BusinessEditForm: React.FC<{ business: Business; onSave: () => void; onCan
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [hoveredPhoto, setHoveredPhoto] = useState<string | null>(null);
+  const [keywords, setKeywords] = useState('');
+  const [isGenerating, setIsGenerating] = useState(false);
 
   const mode = (formData as any).appointment_mode as AppointmentMode || 'generico';
-
   const allBusinessPhotos = Array.from(new Set([...(formData.logo_url ? [formData.logo_url] : []), ...formData.photos]));
 
   const handleSetAsMain = (photoUrl: string) => {
@@ -389,6 +520,35 @@ const BusinessEditForm: React.FC<{ business: Business; onSave: () => void; onCan
       : [...current, categoryName];
     setFormData({ ...(formData as any), categories: newCategories });
   };
+  
+  const handleGenerateDescription = async () => {
+    setIsGenerating(true);
+    setError('');
+    try {
+      const response = await fetch(`${API_BASE_URL}/businesses/generate-description`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          name: formData.name,
+          categories: formData.categories || [],
+          keywords: keywords,
+        }),
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.detail || 'No se pudo generar la descripción.');
+      }
+      setFormData(prev => ({ ...(prev as any), description: data.description }));
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setIsGenerating(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -431,8 +591,6 @@ const BusinessEditForm: React.FC<{ business: Business; onSave: () => void; onCan
             <LocationPicker onLocationSelect={handleLocationSelect} initialAddress={formData.address} />
             <TextField label="Dirección Seleccionada" value={formData.address} InputProps={{readOnly: true}} fullWidth sx={{mt: 2}} />
           </Box>
-
-          {}
           <FormControl fullWidth>
             <InputLabel id="mode-label">Modo de citas</InputLabel>
             <Select
@@ -448,8 +606,34 @@ const BusinessEditForm: React.FC<{ business: Business; onSave: () => void; onCan
               <MenuItem value="por_empleado">Citas por empleado (cliente elige empleado)</MenuItem>
             </Select>
           </FormControl>
-
+          
           <TextField label="Descripción" value={formData.description} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({...formData, description: e.target.value} as any)} required multiline rows={4} fullWidth />
+
+          <Paper variant="outlined" sx={{ p: 2, borderRadius: 2 }}>
+            <Typography variant="body2" fontWeight="bold" gutterBottom>
+              Asistente de IA
+            </Typography>
+            <Stack direction={{xs: 'column', sm: 'row'}} spacing={2} alignItems="center">
+              <TextField
+                label="Palabras clave (opcional)"
+                placeholder="Ej: familiar, elegante, moderno"
+                value={keywords}
+                onChange={(e) => setKeywords(e.target.value)}
+                fullWidth
+                size="small"
+                helperText="Ayuda a la IA a entender mejor tu negocio."
+              />
+              <Button
+                variant="contained"
+                startIcon={<AutoAwesomeIcon />}
+                onClick={handleGenerateDescription}
+                disabled={isGenerating || !formData.name}
+                sx={{ flexShrink: 0 }}
+              >
+                {isGenerating ? 'Generando...' : 'Generar Descripción'}
+              </Button>
+            </Stack>
+          </Paper>
 
           <Box>
             <Typography fontWeight="600" gutterBottom>Categorías</Typography>

@@ -4,12 +4,14 @@ import { Business, Appointment, Employee } from '@/types';
 import { useAuth } from '@/hooks/useAuth';
 import { ExtendedPage } from '@/App';
 import { LocationDisplay } from '@/components/LocationDisplay';
-
+import { Chatbot } from '@/components/Chatbot';
+import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import {
   Box, Typography, Button, Paper, CircularProgress, Divider, TextField, IconButton,
   Dialog, DialogTitle, DialogContent, DialogActions, Alert, MenuItem, Select,
   FormControl, InputLabel, Stack, Avatar, Rating, Chip
 } from '@mui/material';
+import { keyframes } from '@mui/system';
 import type { SelectChangeEvent } from '@mui/material/Select';
 import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
@@ -18,6 +20,8 @@ import PersonIcon from '@mui/icons-material/Person';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import StarIcon from '@mui/icons-material/Star';
 import ReviewsIcon from '@mui/icons-material/Reviews';
+import VerifiedUserIcon from '@mui/icons-material/VerifiedUser';
+import StorefrontIcon from '@mui/icons-material/Storefront';
 
 const safeId = (obj: { id?: string; _id?: string } | null | undefined) =>
   (obj?.id as string) || (obj?._id as string) || '';
@@ -48,7 +52,7 @@ type UserLite = {
   full_name?: string;
   email?: string;
   profile_picture_url?: string; 
-  role?: string;
+  role?: 'usuario' | 'dueño' | 'admin';
 };
 
 const ConfirmationDialog: React.FC<{
@@ -60,6 +64,7 @@ const ConfirmationDialog: React.FC<{
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [email, setEmail] = useState(user?.email || '');
   const appointmentId = (appointment as any).id || (appointment as any)._id;
 
   const handleSendEmail = async () => {
@@ -70,10 +75,12 @@ const ConfirmationDialog: React.FC<{
     try {
       const res = await fetch(`${API_BASE_URL}/appointments/${appointmentId}/send-pdf`, {
         method: 'POST',
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ email: email })
       });
       if (!res.ok) throw new Error('No se pudo enviar el correo.');
-      setSuccess(`Comprobante enviado a ${user?.email}.`);
+      const data = await res.json();
+      setSuccess(data.message || `Comprobante enviado a ${email}.`);
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -82,23 +89,35 @@ const ConfirmationDialog: React.FC<{
   };
 
   return (
-    <Dialog open onClose={onClose}>
+    <Dialog open onClose={onClose} fullWidth maxWidth="sm">
       <DialogTitle fontWeight="bold">¡Reserva Confirmada!</DialogTitle>
       <DialogContent>
         <Typography>Tu cita ha sido agendada con éxito.</Typography>
-        <Typography color="text.secondary" sx={{ mt: 1 }}>
-          Puedes ver y gestionar todas tus citas, además de descargar los comprobantes en PDF, desde la sección "Mis Citas".
+        <Typography color="text.secondary" sx={{ mt: 1, mb: 2 }}>
+          Puedes ver y gestionar todas tus citas desde la sección "Mis Citas".
         </Typography>
         <Divider sx={{ my: 2 }} />
-        <Typography>¿Deseas recibir el comprobante de esta cita en tu correo electrónico ({user?.email})?</Typography>
-        {error && <Alert severity="error" sx={{ mt: 1 }}>{error}</Alert>}
-        {success && <Alert severity="success" sx={{ mt: 1 }}>{success}</Alert>}
+        <Typography sx={{ mb: 2 }}>
+          Ingresa el correo electrónico al que deseas recibir el comprobante de la cita.
+        </Typography>
+        <TextField
+          autoFocus
+          label="Correo Electrónico"
+          type="email"
+          fullWidth
+          variant="outlined"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          disabled={!!success}
+        />
+        {error && <Alert severity="error" sx={{ mt: 2 }}>{error}</Alert>}
+        {success && <Alert severity="success" sx={{ mt: 2 }}>{success}</Alert>}
       </DialogContent>
       <DialogActions sx={{ p: 2, justifyContent: 'space-between' }}>
         <Button onClick={() => navigateTo('appointments')}>Ir a Mis Citas</Button>
         <Box>
-          <Button onClick={onClose} disabled={!!success}>No, gracias</Button>
-          <Button variant="contained" onClick={handleSendEmail} disabled={isLoading || !!success}>
+          <Button onClick={onClose} disabled={!!success}>Cerrar</Button>
+          <Button variant="contained" onClick={handleSendEmail} disabled={isLoading || !!success || !email}>
             {isLoading ? 'Enviando...' : 'Enviar Correo'}
           </Button>
         </Box>
@@ -223,7 +242,6 @@ const BookingModal: React.FC<{
 
         {error && <Alert severity="error" sx={{ my: 2 }}>{error}</Alert>}
 
-        {}
         <Box sx={{ mb: 3 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
             <CalendarMonthIcon /><Typography fontWeight={700}>1. Elige una fecha</Typography>
@@ -237,7 +255,6 @@ const BookingModal: React.FC<{
           />
         </Box>
 
-        {}
         {needEmployee && (
           <Box sx={{ mb: 3 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
@@ -264,7 +281,6 @@ const BookingModal: React.FC<{
           </Box>
         )}
 
-        {}
         <Box>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
             <AccessTimeIcon /><Typography fontWeight={700}>3. Elige una hora disponible</Typography>
@@ -311,18 +327,24 @@ const BookingModal: React.FC<{
   );
 };
 
+const glowingAnimation = keyframes`
+  0% { box-shadow: 0 0 5px #007BFF, 0 0 10px #007BFF, 0 0 15px #007BFF; }
+  50% { box-shadow: 0 0 10px #0056b3, 0 0 20px #0056b3, 0 0 30px #0056b3; }
+  100% { box-shadow: 0 0 5px #007BFF, 0 0 10px #007BFF, 0 0 15px #007BFF; }
+`;
+
 const ReviewsSection: React.FC<{
   businessId: string;
-  canReview: boolean;
-}> = ({ businessId, canReview }) => {
+}> = ({ businessId }) => {
   const { token, user } = useAuth();
   const [reviews, setReviews] = useState<Review[]>([]);
   const [usersMap, setUsersMap] = useState<Record<string, UserLite>>({});
-  const [rating, setRating] = useState<number | null>(0);
+  const [rating, setRating] = useState<number | null>(5);
   const [comment, setComment] = useState('');
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
+  const [canReview, setCanReview] = useState(false);
   const [appointmentId, setAppointmentId] = useState<string | null>(null);
 
   const REVIEWS_LIST_URL = `${API_BASE_URL}/reviews/business/${businessId}`;
@@ -346,54 +368,29 @@ const ReviewsSection: React.FC<{
     return data;
   };
 
-  const normalizeId = (x: any): string | null => {
-    if (!x) return null;
-    if (typeof x === 'string') return x;
-    if (typeof x === 'object') return (x.$oid || x._id || x.id) ?? null;
-    return null;
-  };
-
-  const resolveAppointmentId = useCallback(async () => {
-    if (!token) { setAppointmentId(null); return; }
+  const checkEligibility = useCallback(async () => {
+    if (!token) {
+        setCanReview(false);
+        return;
+    }
+    if (user?.role === 'admin' || user?.role === 'dueño') {
+        setCanReview(true);
+        setAppointmentId(null);
+        return;
+    }
 
     try {
       const elig = await fetchJSON(`${API_BASE_URL}/reviews/eligibility/${businessId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      if (elig?.eligible) {
-        if (elig?.appointment_id) { setAppointmentId(elig.appointment_id); return; }
-      } else {
-        setAppointmentId(null);
-        return;
-      }
-    } catch {  }
-
-    try {
-      const myApps: any[] = await fetchJSON(`${API_BASE_URL}/appointments/me`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const now = Date.now();
-      const candidates = (myApps || []).filter((a) => {
-        const bId = normalizeId(a.business_id);
-        const status = (a.status || '').toLowerCase();
-        const t = a.appointment_time ? new Date(a.appointment_time).getTime() : 0;
-        const notCancelled = status !== 'cancelled' && status !== 'canceled';
-        const passedOrNoTime = !t || t <= now;
-        return bId === businessId && notCancelled && passedOrNoTime;
-      });
-      if (!candidates.length) { setAppointmentId(null); return; }
-      candidates.sort((x, y) => {
-        const tx = x.appointment_time ? new Date(x.appointment_time).getTime() : 0;
-        const ty = y.appointment_time ? new Date(y.appointment_time).getTime() : 0;
-        return ty - tx;
-      });
-      const id = normalizeId(candidates[0]?._id);
-      setAppointmentId(id);
+      setCanReview(elig?.eligible || false);
+      setAppointmentId(elig?.appointment_id || null);
     } catch {
+      setCanReview(false);
       setAppointmentId(null);
     }
-  }, [businessId, token]);
-
+  }, [businessId, token, user?.role]);
+  
   const load = useCallback(async () => {
     setLoading(true);
     setError('');
@@ -420,8 +417,10 @@ const ReviewsSection: React.FC<{
     }
   }, [REVIEWS_LIST_URL]);
 
-  useEffect(() => { void load(); }, [load]);
-  useEffect(() => { void resolveAppointmentId(); }, [resolveAppointmentId]);
+  useEffect(() => { 
+    void load();
+    void checkEligibility();
+  }, [load, checkEligibility]);
 
   const avg = useMemo(() => {
     if (!reviews.length) return 0;
@@ -433,7 +432,10 @@ const ReviewsSection: React.FC<{
     if (!token) return alert('Inicia sesión para opinar.');
     if (!rating || rating < 1) return alert('Selecciona una puntuación.');
     if (!comment.trim()) return alert('Escribe un comentario.');
-    if (!appointmentId) { setError('No pudimos validar una cita elegible para este negocio.'); return; }
+    if (user?.role === 'usuario' && !appointmentId) {
+        setError('No pudimos validar una cita elegible para este negocio.'); 
+        return; 
+    }
 
     setSubmitting(true);
     setError('');
@@ -451,9 +453,10 @@ const ReviewsSection: React.FC<{
           comment: comment.trim(),
         }),
       });
-      setRating(0);
+      setRating(5);
       setComment('');
       await load();
+      await checkEligibility();
     } catch (e: any) {
       setError(e.message);
     } finally {
@@ -461,7 +464,15 @@ const ReviewsSection: React.FC<{
     }
   };
 
-  const uiCanReview = Boolean(appointmentId) || canReview;
+  const RoleChip = ({ role }: { role: UserLite['role'] }) => {
+    if (role === 'dueño') {
+      return <Chip icon={<StorefrontIcon />} label="Dueño" size="small" color="info" variant="outlined" sx={{ ml: 1 }} />;
+    }
+    if (role === 'admin') {
+      return <Chip icon={<VerifiedUserIcon />} label="Admin" size="small" color="success" variant="filled" sx={{ ml: 1 }} />;
+    }
+    return null;
+  };
 
   return (
     <Paper variant="outlined" sx={{ mt: 4, p: { xs: 2, md: 3 }, borderRadius: 3 }}>
@@ -470,26 +481,24 @@ const ReviewsSection: React.FC<{
         <Typography variant="h5" fontWeight={700}>Reseñas</Typography>
       </Stack>
 
-      {}
       <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 2 }}>
         <Rating value={avg} precision={0.1} readOnly />
         <Typography fontWeight={700}>{avg.toFixed(1)}</Typography>
         <Typography color="text.secondary">· {reviews.length} reseña{reviews.length !== 1 ? 's' : ''}</Typography>
       </Stack>
 
-      {}
-      {uiCanReview ? (
+      {canReview && (
         <Paper variant="outlined" sx={{ p: 2, mb: 2, borderRadius: 2 }}>
           <Stack spacing={1.5}>
             <Stack direction="row" alignItems="center" spacing={1}>
               <Avatar
-                src={user?.profile_picture_url ?? undefined} // <-- FIX
+                src={user?.profile_picture_url ?? undefined}
                 alt={user?.full_name || user?.email || 'Usuario'}
               >
                 {(user?.full_name || user?.email || 'U').charAt(0).toUpperCase()}
               </Avatar>
               <Typography fontWeight={600}>{user?.full_name || user?.email || 'Tú'}</Typography>
-              <Chip size="small" label="Puedes opinar" color="success" variant="outlined" sx={{ ml: 'auto' }} />
+              <RoleChip role={user?.role} />
             </Stack>
             <Stack direction="row" alignItems="center" spacing={1}>
               <Typography>Puntuación:</Typography>
@@ -512,13 +521,14 @@ const ReviewsSection: React.FC<{
             </Stack>
           </Stack>
         </Paper>
-      ) : (
-        <Alert severity="warning" sx={{ mb: 2 }}>
-          Solo puedes opinar si ya tuviste una cita con este negocio.
+      )}
+      
+      {!canReview && user && user.role === 'usuario' && (
+        <Alert severity="info" sx={{ mb: 2 }}>
+          Solo puedes opinar si ya tuviste una cita completada con este negocio.
         </Alert>
       )}
 
-      {}
       {loading ? (
         <Box sx={{ textAlign: 'center', py: 3 }}><CircularProgress size={22} /></Box>
       ) : reviews.length === 0 ? (
@@ -541,8 +551,9 @@ const ReviewsSection: React.FC<{
                   <Box sx={{ flex: 1 }}>
                     <Stack direction="row" alignItems="center" spacing={1}>
                       <Typography fontWeight={700}>{u?.full_name || u?.email || 'Usuario'}</Typography>
+                      <RoleChip role={u?.role} />
                       <Rating value={r.rating} readOnly size="small" />
-                      <Typography variant="caption" color="text.secondary">
+                      <Typography variant="caption" color="text.secondary" sx={{ml: 'auto'}}>
                         {when.toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' })}
                       </Typography>
                     </Stack>
@@ -552,17 +563,26 @@ const ReviewsSection: React.FC<{
                       <Paper
                         variant="outlined"
                         sx={{
-                          mt: 1,
-                          p: 1,
-                          borderRadius: 2,
-                          bgcolor: r.reply.role === 'admin' ? 'warning.50' : 'action.hover',
-                          borderColor: r.reply.role === 'admin' ? 'warning.light' : 'divider',
+                          mt: 1, p: 1, borderRadius: 2,
+                          ...(r.reply.role === 'admin' && {
+                            border: '1px solid',
+                            borderColor: 'primary.main',
+                            animation: `${glowingAnimation} 3s infinite ease-in-out`,
+                            background: `linear-gradient(135deg, rgba(0, 123, 255, 0.1) 0%, rgba(0, 50, 100, 0.1) 100%)`
+                          }),
+                          ...(r.reply.role === 'owner' && {
+                            bgcolor: 'action.hover',
+                          })
                         }}
                       >
-                        <Typography variant="caption" fontWeight={700}>
-                          {r.reply.role === 'admin' ? 'Respuesta del admin' : 'Respuesta del propietario'}
-                        </Typography>
-                        <Typography variant="body2" sx={{ mt: .5 }}>
+                        <Stack direction="row" alignItems="center" spacing={1}>
+                          {r.reply.role === 'admin' && <VerifiedUserIcon color="primary" fontSize="small"/>}
+                          {r.reply.role === 'owner' && <StorefrontIcon color="action" fontSize="small"/>}
+                          <Typography variant="caption" fontWeight={700}>
+                            {r.reply.role === 'admin' ? 'Respuesta del Administrador' : 'Respuesta del Propietario'}
+                          </Typography>
+                        </Stack>
+                        <Typography variant="body2" sx={{ mt: .5, pl: 3.5 }}>
                           {r.reply.text}
                         </Typography>
                       </Paper>
@@ -590,8 +610,7 @@ export const BusinessDetailsPage: React.FC<BusinessDetailsPageProps> = ({ busine
   const [showBookingModal, setShowBookingModal] = useState(false);
   const [confirmedAppointment, setConfirmedAppointment] = useState<Appointment | null>(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-
-  const [canReview, setCanReview] = useState(false);
+  const [showChatbot, setShowChatbot] = useState(false);
 
   const fetchDetails = useCallback(async () => {
     setIsLoading(true);
@@ -608,36 +627,6 @@ export const BusinessDetailsPage: React.FC<BusinessDetailsPageProps> = ({ busine
 
   useEffect(() => { void fetchDetails(); }, [fetchDetails]);
 
-  useEffect(() => {
-    const run = async () => {
-      try {
-        if (!token || !business) {
-          setCanReview(false);
-          return;
-        }
-        const bizId = bizIdOf(business);
-        if (!bizId) { setCanReview(false); return; }
-
-        const res = await fetch(`${API_BASE_URL}/appointments/me`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if (!res.ok) { setCanReview(false); return; }
-        const myApps: Appointment[] = await res.json();
-
-        const now = Date.now();
-        const eligible = myApps.some(a =>
-          (a as any).business_id === bizId &&
-          new Date((a as any).appointment_time).getTime() < now &&
-          (a as any).status !== 'cancelled'
-        );
-        setCanReview(eligible);
-      } catch {
-        setCanReview(false);
-      }
-    };
-    void run();
-  }, [token, business]);
-
   const handleBookingSuccess = (newAppointment: Appointment) => {
     setShowBookingModal(false);
     setConfirmedAppointment(newAppointment);
@@ -653,6 +642,7 @@ export const BusinessDetailsPage: React.FC<BusinessDetailsPageProps> = ({ busine
 
   const goToPrevious = () => setCurrentImageIndex(prev => (prev === 0 ? allImages.length - 1 : prev - 1));
   const goToNext = () => setCurrentImageIndex(prev => (prev === allImages.length - 1 ? 0 : prev + 1));
+
 
   if (isLoading) return <Box sx={{ textAlign: 'center', p: 4 }}><CircularProgress /></Box>;
   if (!business) return <Box sx={{ textAlign: 'center', p: 4 }}><Typography>Negocio no encontrado.</Typography></Box>;
@@ -676,6 +666,35 @@ export const BusinessDetailsPage: React.FC<BusinessDetailsPageProps> = ({ busine
           navigateTo={navigateTo}
         />
       )}
+      
+      <IconButton
+        color="primary"
+        sx={{
+          position: 'fixed',
+          bottom: 24,
+          right: 24,
+          bgcolor: 'primary.main',
+          color: 'white',
+          width: 64,
+          height: 64,
+          zIndex: 1200,
+          '&:hover': { bgcolor: 'primary.dark', transform: 'scale(1.1)' },
+          boxShadow: 6,
+          transition: 'transform 0.2s ease-in-out'
+        }}
+        onClick={() => setShowChatbot(!showChatbot)}
+        title="Asistente de Citas IA"
+      >
+        <AutoAwesomeIcon fontSize="large" />
+      </IconButton>
+      
+      {showChatbot && token && (
+        <Chatbot 
+          businessId={businessId} 
+          businessName={(business as any).name} 
+          navigateTo={navigateTo} 
+        />
+      )}
 
       <Paper elevation={4} sx={{
         display: 'grid',
@@ -684,7 +703,6 @@ export const BusinessDetailsPage: React.FC<BusinessDetailsPageProps> = ({ busine
         p: { xs: 2, md: 4 },
         borderRadius: 4
       }}>
-        {}
         <Box sx={{ position: 'relative', width: '100%', height: { xs: 300, md: 450 }, borderRadius: 2, overflow: 'hidden' }}>
           {allImages.length > 1 && (
             <>
@@ -703,7 +721,6 @@ export const BusinessDetailsPage: React.FC<BusinessDetailsPageProps> = ({ busine
           />
         </Box>
 
-        {}
         <Box>
           <Typography color="text.secondary" fontWeight="bold" textTransform="uppercase">
             {((business as any).categories || []).join(', ') || 'Sin Categoría'}
@@ -746,8 +763,7 @@ export const BusinessDetailsPage: React.FC<BusinessDetailsPageProps> = ({ busine
         </Box>
       </Paper>
 
-      {}
-      <ReviewsSection businessId={bizIdOf(business as any)} canReview={canReview} />
+      <ReviewsSection businessId={bizIdOf(business as any)} />
     </Box>
   );
 };
