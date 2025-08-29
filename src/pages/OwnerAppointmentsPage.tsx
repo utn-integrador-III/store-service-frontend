@@ -126,11 +126,7 @@ export const OwnerAppointmentsPage: React.FC<OwnerAppointmentsPageProps> = ({ bu
                       {email}
                     </Typography>
                     {}
-                    {/* {a.employee_id && (
-                      <Typography variant="caption" color="text.secondary" display="block">
-                        Empleado asignado: {a.employee_id}
-                      </Typography>
-                    )} */}
+                    {}
                   </Box>
 
                   <Box
