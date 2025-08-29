@@ -2,7 +2,7 @@ import { SvgIcon } from '@mui/material';
 import SvgIconComponent from '@mui/material/SvgIcon';
 import * as MuiIcons from '@mui/icons-material';
 
-// --- ÍCONO DE GOOGLE RESTAURADO ---
+
 export function GoogleIcon() {
   return (
     <SvgIcon>
@@ -35,10 +35,12 @@ export function GoogleIcon() {
 }
 
 
+
 export const iconMap: { [key: string]: typeof SvgIconComponent } = {
-  ...(MuiIcons as { [key: string]: typeof SvgIconComponent }), 
-  'default': MuiIcons.Storefront, 
+  ...(MuiIcons as { [key: string]: typeof SvgIconComponent }),
+  'default': MuiIcons.Storefront,
 };
+
 
 
 export const StarIcon = MuiIcons.Star;

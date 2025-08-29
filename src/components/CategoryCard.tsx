@@ -16,6 +16,8 @@ const cardVariants: Variants = {
 };
 
 const CategoryCard = ({ category, isSelected, onClick }: CategoryCardProps) => {
+
+
   const iconKey = category.icon_name || category.name.toLowerCase().split(' ')[0];
   const Icon = iconMap[iconKey] || iconMap.default;
 
