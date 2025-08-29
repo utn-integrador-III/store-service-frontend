@@ -6,6 +6,7 @@ import { ExtendedPage } from '@/App';
 import { LocationDisplay } from '@/components/LocationDisplay';
 import { Chatbot } from '@/components/Chatbot';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
+
 import {
   Box, Typography, Button, Paper, CircularProgress, Divider, TextField, IconButton,
   Dialog, DialogTitle, DialogContent, DialogActions, Alert, MenuItem, Select,
@@ -22,6 +23,14 @@ import StarIcon from '@mui/icons-material/Star';
 import ReviewsIcon from '@mui/icons-material/Reviews';
 import VerifiedUserIcon from '@mui/icons-material/VerifiedUser';
 import StorefrontIcon from '@mui/icons-material/Storefront';
+
+
+
+type DetailedSlot = {
+  time: string;
+  is_available: boolean;
+};
+
 
 const safeId = (obj: { id?: string; _id?: string } | null | undefined) =>
   (obj?.id as string) || (obj?._id as string) || '';
@@ -51,7 +60,7 @@ type UserLite = {
   _id?: string;
   full_name?: string;
   email?: string;
-  profile_picture_url?: string; 
+  profile_picture_url?: string;
   role?: 'usuario' | 'dueño' | 'admin';
 };
 
@@ -137,7 +146,9 @@ const BookingModal: React.FC<{
   const [selectedDate, setSelectedDate] = useState<string>(() => new Date().toISOString().slice(0, 10));
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [employeeId, setEmployeeId] = useState<string>('');
-  const [availableSlots, setAvailableSlots] = useState<string[]>([]);
+  
+  const [availableSlots, setAvailableSlots] = useState<DetailedSlot[]>([]);
+  
   const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
   const [isLoadingSlots, setIsLoadingSlots] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -184,7 +195,9 @@ const BookingModal: React.FC<{
         if (needEmployee && employeeId) query.set('employee_id', employeeId);
         const res = await fetch(`${API_BASE_URL}/businesses/${bizId}/available-slots?${query.toString()}`);
         if (!res.ok) throw new Error('No se pudo cargar la disponibilidad para este día.');
+        
         setAvailableSlots(await res.json());
+
       } catch (err: any) {
         setAvailableSlots([]);
         setError(err.message);
@@ -299,15 +312,18 @@ const BookingModal: React.FC<{
               maxHeight: 240,
               overflowY: 'auto'
             }}>
+              {}
               {availableSlots.length > 0 ? availableSlots.map((slot) => (
                 <Button
-                  key={slot}
-                  variant={selectedSlot === slot ? 'contained' : 'outlined'}
-                  onClick={() => setSelectedSlot(slot)}
+                  key={slot.time}
+                  variant={selectedSlot === slot.time ? 'contained' : 'outlined'}
+                  onClick={() => setSelectedSlot(slot.time)}
+                  disabled={!slot.is_available}
                 >
-                  {slot}
+                  {slot.time}
                 </Button>
               )) : <Typography color="text.secondary">No hay horarios disponibles.</Typography>}
+              {}
             </Box>
           )}
         </Box>

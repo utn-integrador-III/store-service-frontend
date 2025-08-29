@@ -281,7 +281,7 @@ const ManageCategories: React.FC<{ onUpdate: () => void }> = ({ onUpdate }) => {
       setIsLoading(false);
     };
     fetchCategories();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+
   }, [onUpdate]);
 
   const handleDelete = async (categoryId: string) => {

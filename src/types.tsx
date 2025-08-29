@@ -1,4 +1,3 @@
-
 export type ScheduleDay = {
   is_active: boolean;
   open_time: string;
@@ -24,20 +23,12 @@ export interface Business {
   status: 'draft' | 'published' | 'archived';
   schedule?: any;
   appointment_mode?: 'generico' | 'por_empleado';
+  owner_id?: string;        
 
-  owner_id?: string;
+  avg_rating?: number;      
+  reviews_count?: number;    
 
-  // renombrados para coincidir con ListingCard
-  avg_rating?: number;
-  reviews_count?: number;
 }
-
-export type Category = {
-  id?: string;
-  _id?: string;
-  name: string;
-  icon_name?: string; // agregado para CategoryCard
-};
 
 export interface Appointment {
   id?: string; _id?: string;
@@ -48,7 +39,12 @@ export interface Appointment {
   employee_id?: string | null;
 }
 
-
+export type Category = { 
+  id?: string; 
+  _id?: string; 
+  name: string;
+  icon_name?: string; 
+};
 
 export type Employee = {
   id: string;
@@ -76,7 +72,6 @@ export interface Review {
   created_at: string;      
   replies?: ReviewReply[];
 }
-
 
 export interface OwnerRequest {
   business_name: string;

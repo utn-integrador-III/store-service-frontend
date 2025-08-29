@@ -5,11 +5,12 @@ import { Business, Category, Schedule, ScheduleDay } from '@/types';
 import { LocationPicker } from '@/components/LocationPicker';
 import { ExtendedPage } from '@/App';
 import { StarIcon } from '@/components/Icons';
+
 import {
   Box, Typography, Button, Paper, TextField, CircularProgress, Alert, Stack, Divider,
   Select, MenuItem, FormControl, InputLabel, IconButton, Chip, Checkbox, FormControlLabel, Switch,
   Dialog, DialogTitle, DialogContent, DialogActions, List, ListItem, ListItemText, ListItemAvatar, Avatar,
-  Tabs, Tab 
+  Tabs, Tab
 } from '@mui/material';
 import type { SelectChangeEvent } from '@mui/material/Select';
 import EditIcon from '@mui/icons-material/Edit';
@@ -88,15 +89,15 @@ const EmployeeScheduleDialog: React.FC<{
   open: boolean; onClose: () => void; employee: IEmployee; businessId: string; onSaved: () => void;
 }> = ({ open, onClose, employee, businessId, onSaved }) => {
   const { token } = useAuth();
-  const [tab, setTab] = useState(0); 
+  const [tab, setTab] = useState(0);
 
-  
+
   const [assignLoading, setAssignLoading] = useState(true);
   const [slotsByDay, setSlotsByDay] = useState<Record<string, string[]>>({});
   const [selectedSlots, setSelectedSlots] = useState<Record<string, Set<string>>>({});
   const [isSaving, setIsSaving] = useState(false);
   
-  
+
   const [occupancyLoading, setOccupancyLoading] = useState(false);
   const [detailedSlots, setDetailedSlots] = useState<DetailedSlot[]>([]);
   const [selectedDate, setSelectedDate] = useState(() => new Date().toISOString().slice(0, 10));
@@ -109,7 +110,7 @@ const EmployeeScheduleDialog: React.FC<{
     thursday: 'Jueves', friday: 'Viernes', saturday: 'Sábado', sunday: 'Domingo'
   };
 
-  
+
   useEffect(() => {
     if (tab === 0 && open) {
       const loadAssignableSlots = async () => {
@@ -155,7 +156,7 @@ const EmployeeScheduleDialog: React.FC<{
     }
   }, [open, tab, businessId, employee.allowed_slots]);
 
- 
+
   useEffect(() => {
     if (tab === 1 && open) {
       const loadOccupancy = async () => {
@@ -228,7 +229,7 @@ const EmployeeScheduleDialog: React.FC<{
         <DialogContent dividers>
           {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
           
-          {tab === 0 && ( 
+          {tab === 0 && (
             assignLoading ? (
               <Box sx={{ display: 'flex', justifyContent: 'center', my: 2 }}><CircularProgress /></Box>
             ) : (
@@ -252,7 +253,7 @@ const EmployeeScheduleDialog: React.FC<{
             )
           )}
 
-          {tab === 1 && ( 
+          {tab === 1 && (
             <Stack spacing={2}>
               <TextField type="date" value={selectedDate} onChange={(e) => setSelectedDate(e.target.value)} label="Seleccionar fecha" fullWidth />
               {occupancyLoading ? (
@@ -284,6 +285,8 @@ const EmployeeScheduleDialog: React.FC<{
     </>
   );
 };
+
+
 
 const EmployeeManager: React.FC<{ businessId: string }> = ({ businessId }) => {
   const { token } = useAuth();

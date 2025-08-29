@@ -15,11 +15,11 @@ const cardVariants: Variants = {
 };
 
 const ListingCard = ({ business, onViewDetails }: ListingCardProps) => {
-  
+
   const averageRating = business.avg_rating || 0;
   const reviewCount = business.reviews_count || 0;
   const imageUrl = business.logo_url || 'https://via.placeholder.com/300x180.png?text=Sin+Imagen';
- 
+
 
   return (
     <motion.div

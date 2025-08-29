@@ -120,7 +120,7 @@ export const Chatbot: React.FC<ChatbotProps> = ({ businessId, businessName, navi
           const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm; codecs=opus' });
           const formData = new FormData();
           formData.append('audio_file', audioBlob);
-          setIsLoading(true); // Muestra feedback mientras se transcribe
+          setIsLoading(true);
 
           try {
             const response = await fetch(`${API_BASE_URL}/voice/speech-to-text`, {

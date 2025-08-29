@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { API_BASE_URL } from '@/services/api';
@@ -11,7 +10,10 @@ import {
 import QrCode2Icon from '@mui/icons-material/QrCode2';
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 
-const getApptId = (a: Appointment) => (a.id || (a as any)._id) as string;
+const getSafeId = (item: { id?: string; _id?: string } | null | undefined): string => {
+    if (!item) return '';
+    return (item.id || (item as any)._id) as string;
+};
 
 
 const QrModal: React.FC<{ appointmentId: string; onClose: () => void }> = ({ appointmentId, onClose }) => {
@@ -127,7 +129,7 @@ const AppointmentCard: React.FC<{
   const { token } = useAuth();
   const [showQr, setShowQr] = useState(false);
   const [showCancelDialog, setShowCancelDialog] = useState(false);
-  const id = getApptId(appointment);
+  const id = getSafeId(appointment);
   const when = new Date(appointment.appointment_time);
 
   const isFuture = when.getTime() > Date.now();
@@ -186,7 +188,7 @@ const AppointmentCard: React.FC<{
               fontWeight={700}
               sx={{ textDecoration: isCancelled ? 'line-through' : 'none' }}
             >
-              {business?.name || 'Negocio'}
+              {business?.name || 'Negocio (No disponible)'}
             </Typography>
             <Typography variant="body2" color="text.secondary">
               {business?.address || 'Ubicación no disponible'}
@@ -255,16 +257,22 @@ export const AppointmentsPage: React.FC = () => {
         const data: Appointment[] = await r.json();
         setAppointments(data);
 
-        const rb = await fetch(`${API_BASE_URL}/businesses/`);
-        if (rb.ok) {
-          const list: Business[] = await rb.json();
-          const map = list.reduce((acc, b) => {
-            const key = (b as any).id || (b as any)._id;
-            if (key) acc[key] = b;
-            return acc;
-          }, {} as Record<string, Business>);
-          setBusinesses(map);
+        const businessIds = [...new Set(data.map(a => a.business_id))];
+        if (businessIds.length > 0) {
+          const businessesPromises = businessIds.map(id =>
+            fetch(`${API_BASE_URL}/businesses/${id}`).then(res => res.ok ? res.json() : null)
+          );
+          const businessesResults = await Promise.all(businessesPromises);
+          const businessMap = businessesResults
+            .filter((b): b is Business => b !== null)
+            .reduce((acc, b) => {
+              const key = getSafeId(b);
+              if (key) acc[key] = b;
+              return acc;
+            }, {} as Record<string, Business>);
+          setBusinesses(businessMap);
         }
+
       } catch (e: any) {
         setError(e.message);
       } finally {
@@ -275,8 +283,8 @@ export const AppointmentsPage: React.FC = () => {
   }, [token, logout]);
 
   const handleCancelled = (updated: Appointment) => {
-    const id = getApptId(updated);
-    setAppointments(prev => prev.map(a => (getApptId(a) === id ? updated : a)));
+    const id = getSafeId(updated);
+    setAppointments(prev => prev.map(a => (getSafeId(a) === id ? updated : a)));
   };
 
   if (isLoading) return <Box sx={{ textAlign: 'center', p: 4 }}><CircularProgress /></Box>;
@@ -290,7 +298,7 @@ export const AppointmentsPage: React.FC = () => {
         <Stack spacing={3}>
           {appointments.map(a => (
             <AppointmentCard
-              key={getApptId(a)}
+              key={getSafeId(a)}
               appointment={a}
               business={businesses[a.business_id]}
               onCancelled={handleCancelled}
